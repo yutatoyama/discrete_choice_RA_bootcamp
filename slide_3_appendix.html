@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>構造推定入門: 補足資料</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="講師: 遠山祐太 (早稲田大学)" />
+    <script src="slide_3_appendix_files/header-attrs-2.14/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# 構造推定入門: 補足資料
+]
+.subtitle[
+## 応用社会科学RAブートキャンプ
+]
+.author[
+### 講師: 遠山祐太 (早稲田大学)
+]
+.date[
+### 最終更新: 2023-08-30 02:04:15
+]
+
+---
+
+class: title-slide-section, center, middle
+name: logistics
+# イントロダクション
+
+---
+## 補足資料
+
+- 本スライドでは、トピックス・レクチャーの補足資料を掲載する。
+
+
+- 内容的に、学部上級ー大学院レベルのものも含むため、必ずしも理解する必要はない。
+
+
+- 上級の内容に興味がある受講生向け。
+
+
+
+
+---
+class: title-slide-section, center, middle
+name: appendix
+# パラメタの識別
+
+
+---
+## 離散選択モデルにおけるパラメタの識別
+
+-   識別: モデルパラメタがデータから一意に特定できること。
+
+
+-   離散選択モデルにおいて選択確率は**効用の差**のみに依存している。
+    `$$P(d_{i}=j)=\mathrm{Pr}\left(\{\epsilon_{ij}\}_{j=1}^{J}:V_{ij}+\epsilon_{ij}\geq V_{ik}+\epsilon_{ik}\ \forall k\neq j\right)$$`
+
+
+- 効用の定式化において2種類の**正規化(normalization)**が必要となる。
+  - 1: location : 定数を足しても同じ (i.e., `\(U_{ij}+\alpha\)` for all `\(j\)`) 
+  - 2: scale : `\(U_{ij}\)` について定数倍しても同じ (i.e.,
+      `\(\alpha U_{ij}\)` for all `\(j\)` for some `\(\alpha&gt;0\)` ) 
+
+---
+## Location Normalization
+
+-   新しい定式化として `\(\tilde{U}_{ij}=U_{ij}+\alpha\)` を考える。
+
+- すると、
+$$
+`\begin{aligned}
+Prob(\tilde{U}_{ij}&gt;\tilde{U}_{ik},\forall k) &amp; = &amp; Prob(U_{ij}+\alpha&gt;U_{ik}+\alpha,\forall k)\\
+   &amp; = &amp; Prob(U_{ij}&gt;U_{ik},\forall k)
+\end{aligned}`
+$$
+
+-   含意: ある選択肢から得られる効用の水準を正規化する必要がある。
+
+-   実証分析では**アウトサイドオプション( `\(j=0\)` )**の効用をゼロと置くことが多い。
+
+
+---
+## Scale Normalization
+
+-   新しい定式化として `\(\tilde{U}_{ij}=\lambda U_{ij}\)` を考える。ただし `\(\lambda&gt;0\)`. 
+
+- すると
+$$
+`\begin{aligned}
+    Prob(\tilde{U}_{ij}&gt;\tilde{U}_{ik},\forall k) &amp; = &amp; Prob(\lambda U_{ij}&gt;\lambda U_{ik},\forall k)\\
+     &amp; = &amp; Prob(U_{ij}&gt;U_{ik},\forall k)
+\end{aligned}`
+$$
+
+
+-   含意: 選考ショックの分散について基準化する必要がある。
+    -   ロジットモデルでは `\(Var(\epsilon_{ij})=\pi^{2}/6\)` としている。
+
+
+-   別の例：二項プロビットモデル `\(U_{i1}=\beta x_{i}+\epsilon_{i1},U_{i0}=0\)` with
+    `\(\epsilon_{i1}\sim N(0,\sigma^{2})\)`. 
+    
+    `$$Prob(d_{i}=1)=\Phi\left(\frac{-\beta x_{i}}{\sigma}\right)$$` 
+    `\(\sigma\)` と `\(\beta\)` は別々に識別されない。
+
+
+&lt;!-- --- --&gt;
+&lt;!-- ## Identification in Logit Model --&gt;
+
+&lt;!-- -   Remember --&gt;
+&lt;!--     `$$\mathrm{Pr}\left(d_{i}=j\right)=\frac{exp(\delta_{j})}{\sum_{k=1}^{J}exp(\delta_{k})}$$` --&gt;
+&lt;!--     where `\(\delta_{j}=\alpha p_{j}+\beta X_{j}\)` --&gt;
+
+&lt;!-- -   With choice data$\{d_{ij}\}$, you can obtain the LHS from the data. --&gt;
+
+&lt;!-- -   Then, $$\begin{aligned} --&gt;
+&lt;!--     \frac{\log\left(\mathrm{Pr}\left(d_{i}=j\right)\right)}{\log\left(\mathrm{Pr}\left(d_{i}=k\right)\right)} &amp; =\delta_{j}-\delta_{k}\\ --&gt;
+&lt;!--      &amp; =\alpha(p_{j}-p_{k})+\beta(X_{j}-X_{k})\end{aligned}$$ --&gt;
+
+&lt;!-- -   The LHS is "observed". `\(\{p_{j},X_{j}\}_{j=1}^{J}\)` are observed. --&gt;
+&lt;!--     Thus `\((\alpha,\beta)\)` are identified under certain conditions. --&gt;
+
+&lt;!-- -   Question: What conditions? --&gt;
+
+
+---
+class: title-slide-section, center, middle
+name: appendix
+# ランダム係数ロジットモデルの詳細
+
+
+---
+## ランダム係数ロジットモデル
+
+- 前のモデルにおいて、消費者間の異質性は選考ショック `\(\epsilon_{i,j}\)` のみに反映。
+
+
+- 消費者の異質性の入れ方
+  - 観察される属性(社会経済属性) を入れる。
+  - 製品属性の選好に関して、観察されない異質性を考える -&gt; **ランダム係数**
+
+
+-   定式化
+    `$$u_{ij}=\beta_{i}X_{j}+\epsilon_{ij}$$`
+    -   ランダム係数 `\(\beta_{i}\sim f(\beta)\)`.
+    -   `\(X_{j}\)`: 製品属性のベクトル
+    -   `\(\epsilon_{ij}\)` は以前と同様。
+    
+    
+---
+## 選択確率
+
+-   ランダム係数 `\(\beta_{i}\)` を所与とすると、選択確率は
+$$
+`\begin{equation}
+Pr(d_{i}=j|\beta_{i})=\frac{\exp\left(\beta_{i}X_{j}\right)}{\sum_{j=1}^{J}\exp\left(\beta_{i}X_{j}\right)}
+\end{equation}`
+$$
+
+-   しかし分析者は `\(\beta_{i}\)` を観察できない。従って、 `\(\beta_{i}\)` について平均をとったものを考える。
+    `$$Pr(d_{i}=j)=\int\frac{\exp\left(\beta_{i}X_{j}\right)}{\sum_{j=1}^{J}\exp\left(\beta_{i}X_{j}\right)}f(\beta_{i})d\beta_{i}$$`
+
+
+
+---
+## 推定における問題点
+
+-   単純化のために一変数を考える。ランダム係数の分布を以下と考える。 `\(\beta\sim N(\mu,\sigma^{2}).\)` 
+
+
+- 目標：ランダム係数の分布パラメタ `\((\mu,\sigma^{2})\)`.
+
+-   個人の選択確率は
+    `$$Pr(d_{i}=j)=\int\underbrace{\frac{\exp\left((\mu+\sigma\nu_{i})X_{ij}\right)}{\sum_{j=1}^{J}\exp\left((\mu+\sigma\nu_{i})X_{ij}\right)}}_{Pr(d_{i}=j|\nu_{i},\theta)}dG(\nu_{i})$$`
+    ここで `\(G(\nu_{i})\)` は標準正規分布 -&gt; `\((\mu + \sigma \nu_i) \sim N(\mu, \sigma^2)\)`
+
+-   問題点：積分があるため、この選択確率を解析的な形で求めることができない。
+
+
+---
+## 解決策：シミュレーションによる近似
+
+
+- 選択確率における積分をモンテカルロ積分する。
+
+-   Step 1: 乱数 `\(\nu\)` を `\(G(\nu)\)` から生成する。 `\(\nu^{r}\)` とラベル付する。.
+-   Step 2: 乱数 `\(\nu^{r}\)` に基づいてロジット確率を計算する。
+`$$Pr(d_{i}=j|\nu^{r})=\frac{\exp\left((\mu+\sigma\nu^{r})X_{j}\right)}{\sum_{j=1}^{J}\exp\left((\mu+\sigma\nu^{r})X_{j}\right)}$$`
+-   Step 3: この手順を `\(R\)` 回繰り返し、その平均を取る。
+`$$\hat{Pr}(d_{i}=j | \theta)=\frac{1}{R}\sum_{r=1}^{R}Pr(d_{i}=j|\nu^{r},\theta)$$`
+
+
+---
+## Simulated Maximum Likelihood Estimator
+
+
+- シミュレーションした対数尤度の最適化を行う。
+`$$SLL(\theta)=\sum_{i=1}^{N}\sum_{j=1}^{J}d_{ij}\log\hat{Pr}(d_{i}=j)$$`
+
+- Simulated MLEと呼ばれる。詳細はTrain Chater 10 を参照。
+
+
+- シミュレーションの方法として、モンテカルロ積分以外にもいくつか方法がある。
+  - Importance sampling
+  - Halton draw
+  - Gaussian quadrature
+  
+  
+---
+## きのこ・たけのこ事例の尤度関数
+
+- 参考：Train Chapter 6.7 "Panel Data"
+
+- パラメタ `\(\theta\)` をもつ個人 `\(i\)` が、選択 `\(y_{ik}\)` を行う確率を `\(P_{i,k}\left(j=y_{i,k}|\theta\right)\)` とする。
+
+- 各個人は５回選択を行うが、その選択を通じて選好パラメタ `\(\theta\)` は共通とする。
+
+- パラメタ `\(\theta\)` をもつ個人 `\(i\)` がデータで観察される一連の選択 `\(\{ y_{i,k} \}_{k=1}^5\)` を行う確率は 
+`$$L_{i}(\theta|\{y_{i,k}\}_{k=1}^{5})=\prod_{k=1}^{5}P_{i,k}\left(j=y_{i,k}|\theta\right)$$`
+
+---
+## 尤度関数続き
+
+- パラメタ自体は観察されないので、分布で積分を取る必要がある。
+`$$P_{i}(\Omega)=\int L_{i}(\theta|\{y_{i,k}\}_{k=1}^{5})f(\theta|\Omega)d\theta$$`
+  - ここで `\(f(\theta|\Omega)\)` はパラメタの分布。 
+  - `\(\Omega\)` は分布のパラメタ。 `\(\Omega=(\theta_{Kino},\sigma_{Kino}^{2},\theta_{Take},\sigma_{Take}^{2},\theta_{\beta},\sigma_{\beta}^{2})\)`
+  - モンテカルロ積分などで近似を行う必要がある。
+
+- 尤度関数は
+`$$L(\Omega)=\prod_{i=1}^{N}P_{i}(\Omega)$$`
+---
+class: title-slide-section, center, middle
+name: appendix
+# いわゆる「構造推定 VS 誘導形」について
+
+---
+
+## いわゆる「誘導系」対「構造推定」の議論
+
+- 「誘導系」アプローチ：ミクロ実証研究における主流
+  - データの良いVariationを見つける （自然実験、操作変数法、回帰不連続デザイン）
+  - 回帰分析フレームワークで、因果効果(トリートメント効果)を推定
+  - 統計学でのCausal inference methodに依拠
+  - 自然実験アプローチとも呼ばれる。
+
+
+- 「誘導系」・「構造推定」アプローチは1990年代半ばくらいから広がっていた。
+
+
+- それと同時に、これら手法の間の対立も発生。
+
+
+---
+## 対立の概略 (個人的見解を多分に含む)
+
+- 「誘導系」から「構造推定」への批判
+  - 経済モデルを明示的に定式化している。仮定がとても強い。
+  - モデルパラメタの推定を、どのようにやっているか不明瞭
+  - シミュレーションによる結果がブラックボックス。
+
+
+
+- 「構造推定」から「誘導系」への批判
+  - 背後のモデルがないので、推定している因果効果パラメタの解釈が不明瞭
+  - 均衡効果を考慮できない (いわゆるSUTVAの仮定)
+  - 「自然実験」がある「理想的」なデータの状況の分析ばかりになるのではないか？
+  
+  
+---
+## 個人的見解：これからの時代は両方必要！！
+
+
+- 「誘導系」と「構造推定」は代替的ではなく、**補完的**
+
+
+- 「誘導系」でも、単に因果効果を推定するだけではなく、**背後のメカニズム**の説明が必要
+  - 経済モデルの重要性
+  
+  
+- 「構造推定」では「自然実験」をうまく活用してパラメタを推定する。
+  - RCTと構造推定を合わせる研究も増えている。
+  - 例１：[Todd and Wolpin (2006)](https://www.aeaweb.org/articles?id=10.1257/aer.96.5.1384)
+  - 例２：[Ito, Ida, and Tanaka (2016)](https://cenrep.ncsu.edu/cenrep/wp-content/uploads/2016/12/K-Ito.pdf)
+  - 例３：[Kawaguchi, Uetake, and Watanabe (2021)](https://pubsonline.informs.org/doi/abs/10.1287/mnsc.2020.3783)
+
+
+---
+## 手法論争に関する関連文献
+
+- ["SYMPOSIUM: CON OUT OF ECONOMICS"](https://www.aeaweb.org/issues/126) appeared in Spring 2010 volume of Journal of Economic Perspectives 
+  - Angrist and Pischke による、いわゆる構造推定アプローチ（特にIOやマクロ）への批判。
+  - それに対する反論 (Keane, Sims, Nevo, Whinston)
+
+
+- ["Structural vs. atheoretic approaches to econometrics"](https://www.sciencedirect.com/science/article/pii/S0304407609001948)
+  - Michael Keane (労働経済学者) による、「自然実験アプローチ」への批判
+  
+  
+- ["Structural vs. Reduced Form:" Language and Models in Empirical Economics"](http://www.econ.yale.edu/~pah29/intro.pdf)
+  - Phil Haile (IO)による論考。
+  - そもそも「誘導系 VS 構造推定」という呼び方や分け方が不適切ではないか？という議論。
+  - 多少読みづらいかもしれないが、**個人的に強くオススメ**
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true,
+"highlightStyle": "github",
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

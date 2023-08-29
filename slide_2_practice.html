@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>構造推定入門: 演習課題</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="講師: 遠山祐太 (早稲田大学)" />
+    <script src="slide_2_practice_files/header-attrs-2.14/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# 構造推定入門: 演習課題
+]
+.subtitle[
+## 応用社会科学RAブートキャンプ
+]
+.author[
+### 講師: 遠山祐太 (早稲田大学)
+]
+.date[
+### 最終更新: 2023-08-30 02:04:31
+]
+
+---
+
+class: title-slide-section, center, middle
+name: logistics
+# 演習課題
+
+---
+## はじめに
+
+- 前半の講義内容に基づいた演習問題をいくつか紹介します。
+
+
+- 自分で解けそう＆気になった問題から取り掛かってください。
+
+
+- 注１：問題の指示が若干ふわっとしているところがあります。
+  - 曖昧な箇所はご自身で考えて回答してください。
+  
+
+- 注２：模範解答は特に用意していません
+  - **実際のRA Workに「模範解答」はありません！**
+  - 皆さんと同時に、私も手元で解いていきます。
+  
+  
+- **質問大歓迎！！**
+  - 今夜は一泊する予定ですので、授業後・夕食後などにもお気軽にどうぞ。
+
+
+---
+## 課題１：利潤最大化価格
+
+- きのこの山とたけのこの里の限界費用（単位費用）を１２０円とする。
+
+- 講義パートにおけるデータ＆ランダム係数ロジットの推定結果に基づいて、利潤最大化するような価格について検討しよう。
+
+- 問１：たけのこの里の価格を200円に固定したとき、きのこの山の利潤が最大になるようなきのこの山の価格を求めよ。
+
+- 問２：きのこの山の価格を200円に固定したとき、たけのこの里の利潤が最大になるようなたけのこの里の価格を求めよ。
+
+- 【難しめ】問３：きのこの山・たけのこの里の価格を同時に動かせるとき、きのこの山とたけのこの里の**合計利潤**が最大になるような価格を求めよ。
+
+- ヒント：利潤を計算する関数を定義し、それについて数値最適化しよう。
+
+
+---
+## 課題２：RA ブートキャンプのサーベイデータ
+
+
+- 皆さんに到着初日に回答してもらったきのこ・たけのこサーベイの結果が`data/KTSurvey_RABootcamp2023_cleaned.csv` にあります。
+
+
+- このデータを用いて、講義パートで行った分析(`mlogit`での推定、フルスクラッチでの推定)を実行せよ。また、結果の差について検討＆議論せよ。
+
+
+- コメント：データは最低限のクリーニングをしたもの。    
+  - 変数名は講義パートのデータ(`data/KTSurvey_Spring2023_cleaned.csv`)と同じ
+  - 変数の中身は、講義パートとは異なっている。
+  - データ共有についての不同意者の回答を落としている。
+
+---
+## 課題３：個人属性の影響
+
+- サーベイでは消費者属性（性別、年齢、出身地、などなど）についても聞いている。
+
+
+- きのこの山・たけのこの里への選好が、消費者属性に依存するようなモデルを考えて推定せよ。
+
+- 例として：
+$$
+`\begin{aligned}
+U_{i, k, Kinoko} &amp;=\alpha_{Kinoko} + \gamma_{Kinoko}^{age} \cdot age_i - \beta \cdot p_{k, Kinoko} +\epsilon_{i, k, Kinoko} \\
+U_{i, k, Takenoko} &amp;=\alpha_{Takenoko} + \gamma_{Takenoko}^{age} \cdot age_i - \beta \cdot p_{k, Takenoko}+\epsilon_{i, k,Takenoko} \\
+U_{i, k, outside} &amp;= \epsilon_{i, k, outside}
+\end{aligned}`
+$$
+
+- ヒント１：`mlogit`で推定する前に、消費者属性と選択パターンの相関を見てみましょう。
+
+---
+
+- ヒント２：`mlogit` の [解説](https://cran.r-project.org/web/packages/mlogit/vignettes/c3.rum.html) が参考に。
+
+
+- 上の例を一部改造：
+
+```r
+library("mlogit")
+```
+
+```
+## Warning: package 'mlogit' was built under R version 4.0.5
+```
+
+```
+## Warning: package 'dfidx' was built under R version 4.0.5
+```
+
+```r
+data("ModeCanada", package = "mlogit")
+MC &lt;- dfidx(ModeCanada, subset = noalt == 4)
+ml.MC1 &lt;- mlogit(choice ~ cost + freq  | income | 0, MC, 
+                 alt.subset = c("car", "train", "air"), reflevel = "car")
+```
+
+
+- この例では
+  - 交通手段選択：Train, Air, Car。 なお、Carを基準オプションとしている。
+  - 選択肢ごとに変わる変数として、`cost`,`freq`,`ovt`
+  - 消費者属性は`income`。この属性が、選択肢によって影響が異なる（つまり係数が異なる）。
+  
+---
+
+```r
+summary(ml.MC1)
+```
+
+```
+## 
+## Call:
+## mlogit(formula = choice ~ cost + freq | income | 0, data = MC, 
+##     alt.subset = c("car", "train", "air"), reflevel = "car", 
+##     method = "nr")
+## 
+## Frequencies of alternatives:choice
+##     car   train     air 
+## 0.45757 0.16721 0.37523 
+## 
+## nr method
+## 5 iterations, 0h:0m:0s 
+## g'(-H)^-1g = 0.000617 
+## successive function values within tolerance limits 
+## 
+## Coefficients :
+##                     Estimate Std. Error  z-value  Pr(&gt;|z|)    
+## (Intercept):train -1.4543116  0.1695671  -8.5766 &lt; 2.2e-16 ***
+## (Intercept):air    1.3797110  0.3574951   3.8594 0.0001137 ***
+## cost              -0.0643521  0.0032226 -19.9691 &lt; 2.2e-16 ***
+## freq               0.1003497  0.0040576  24.7311 &lt; 2.2e-16 ***
+## income:train      -0.0088747  0.0031338  -2.8320 0.0046263 ** 
+## income:air         0.0267426  0.0033714   7.9321  2.22e-15 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Log-Likelihood: -2086.1
+## McFadden R^2:  0.2647 
+## Likelihood ratio test : chisq = 1502 (p.value = &lt; 2.22e-16)
+```
+
+
+
+---
+## 【難】課題４：ランダム係数ロジットモデル
+
+- (これは今日やる課題ではなく、ブートキャンプ後の発展課題として考えてください。)
+
+
+- ランダム係数ロジットモデルについて、`mlogit`パッケージを使わずに、フルスクラッチで推定せよ。
+
+
+- 尤度関数の定義については補足資料を参照。また、Train Chapter 6も参考に。
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true,
+"highlightStyle": "github",
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
