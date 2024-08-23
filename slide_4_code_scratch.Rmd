@@ -1,5 +1,5 @@
 ---
-title: '離散選択モデル: ゼロからコーディング'
+title: '離散選択モデル: 補足資料２(コード編)'
 subtitle: '応用社会科学RAブートキャンプ'
 author: '講師: 遠山祐太 (早稲田大学)'
 date: '最終更新: `r format(Sys.time(), format = "%Y-%m-%d %X")`'
@@ -15,44 +15,11 @@ fig_width: 6
 fig_height: 4
 knit: pagedown::chrome_print
 
----
-class: title-slide-section, center, middle
-name: logistics
-# イントロダクション
-
 
 ---
 class: title-slide-section, center, middle
 name: logistics
 # フルスクラッチでモデル推定
-
-
----
-## 下準備
-
-前に定義した
-data_for_estimation
-を利用する。
-
----
-## 【R分析】ロジット確率計算のための関数
-
-- パラメタ $\beta, \alpha_{Kinoko}, \alpha_{Takenoko}$ と 価格を与えることで、選択確率を計算する。
-
-```{r}
-f_logit_prob <- function(alpha_Kinoko, alpha_Takenoko, beta, price_Kinoko, price_Takenoko){
-
-  util_Kinoko <- alpha_Kinoko - beta*price_Kinoko
-  util_Takenoko <- alpha_Takenoko - beta*price_Takenoko
-
-  prob_Kinoko <- exp( util_Kinoko ) / ( 1 + exp( util_Kinoko ) + exp( util_Takenoko ))
-  prob_Takenoko <- exp( util_Takenoko ) / ( 1 + exp( util_Kinoko ) + exp( util_Takenoko ))
-  prob_Other <- 1 - (prob_Kinoko + prob_Takenoko)
-
-  return( cbind(prob_Kinoko, prob_Takenoko, prob_Other))
-}
-```
-
 
 
 
@@ -70,6 +37,10 @@ f_logit_prob <- function(alpha_Kinoko, alpha_Takenoko, beta, price_Kinoko, price
   - Step 1: 多項ロジットモデルの尤度関数を定義する。
   - Step 2: 最尤法による推定：定義した尤度関数について数値最適化を行う。-> 点推定値
   - Step 3: 標準誤差の計算
+  
+  
+- 参考文献として、Matlabにはなるが以下がオススメ：
+  - Adams, Clarke, and Quinn "Microeconometrics and Matlab"
 
 
 ---
@@ -91,6 +62,32 @@ $$\log L(\theta)= \sum_{i=1}^{N} \sum_{k=1}^{5} \log P_{k}\left(j=y_{i,k}|\theta
 
 - ポイント：この対数尤度を最大化するような値は解析的には得られない。数値計算の出番！！
 
+
+
+---
+## 【R分析】下準備
+
+- `slide_1_lecture.RMD` で作成した `data_for_estimation` を以下では利用する。
+
+
+---
+## 【R分析】ロジット確率計算のための関数
+
+- パラメタ $\beta, \alpha_{Kinoko}, \alpha_{Takenoko}$ と 価格を与えることで、選択確率を計算する。
+
+```{r}
+f_logit_prob <- function(alpha_Kinoko, alpha_Takenoko, beta, price_Kinoko, price_Takenoko){
+
+  util_Kinoko <- alpha_Kinoko - beta*price_Kinoko
+  util_Takenoko <- alpha_Takenoko - beta*price_Takenoko
+
+  prob_Kinoko <- exp( util_Kinoko ) / ( 1 + exp( util_Kinoko ) + exp( util_Takenoko ))
+  prob_Takenoko <- exp( util_Takenoko ) / ( 1 + exp( util_Kinoko ) + exp( util_Takenoko ))
+  prob_Other <- 1 - (prob_Kinoko + prob_Takenoko)
+
+  return( cbind(prob_Kinoko, prob_Takenoko, prob_Other))
+}
+```
 
 
 ---

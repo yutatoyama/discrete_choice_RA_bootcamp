@@ -1,5 +1,5 @@
 ---
-title: '離散選択モデル: 補足資料'
+title: '離散選択モデル: 補足資料１(理論編)'
 subtitle: '応用社会科学RAブートキャンプ'
 author: '講師: 遠山祐太 (早稲田大学)'
 date: '最終更新: `r format(Sys.time(), format = "%Y-%m-%d %X")`'
@@ -31,7 +31,6 @@ name: logistics
 
 - 上級の内容に興味がある受講生向け。
 
-- Adams, Clarke, and Quinn "Microeconometrics and Matlab"
 
 
 ---
