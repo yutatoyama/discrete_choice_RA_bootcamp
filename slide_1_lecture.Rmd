@@ -40,41 +40,51 @@ name: logistics
 
 
 ---
-## 今回の例：離散選択モデル
+## テーマ：離散選択モデルの推定
 
-- 本レクチャーでは、**離散選択モデル**を題材として構造推定を紹介する。
+- 離散選択モデル：**離散変数**の決定に関するモデル
+  - Yes or No (二項選択)
+  - 複数の選択肢からどれを選ぶか(多項選択)
+  - 順序を伴う選択肢：悪い<普通<良い
 
 
-- 理由１：応用範囲が非常に広い
-  - マーケティング：どの財を購入するか？
+- 特徴１：応用範囲が非常に広い
+  - マーケティング・消費者行動：どの財を購入するか？
   - 交通：通勤経路の選択（電車・バス・自家用車）
   - 労働・教育：どの学校に出願するか？ いつ引退するか？
   - 政治経済学：誰に投票するか？
-  - 産業組織論：市場に参入するか否か（ゲーム理論的モデル）
 
 
-- 理由２：モデル・計量分析・プログラミングともに比較的シンプル
+- 特徴２：経済学モデルと密接な繋がりを持つ
 
-
-- 理由３：私が一番好きな経済モデルだから。
 
 
 ---
-## 今日のプランと参考文献
+## 講義の目標
+
+
+- 目標１：離散選択モデルによって、どのような分析ができるかを学ぶ。
+
+
+- 目標２：パッケージを利用した離散選択モデルの推定の基礎を学ぶ。
+
+
+---
+## 今日のプラン
 
 - １コマ目（１３時半から１５時）：講義パート
   - イントロダクション（５分）
-  - 離散選択モデルと最尤法の導入（２０分）
-  - 事例：きのこの山 VS たけのこの里（２０分）
-  - コード：`mlogit`パッケージを使った推定（４５分）
+  - 離散選択モデルと最尤法の導入（３０分）
+  - 事例：きのこの山 VS たけのこの里（１０分）
+  - コーディング：`mlogit`パッケージによる推定（４５分）
 
 
 - ２コマ目（１５時半から１７時）：演習パート
-  - 講義パートの残り
+  - 講義パートの残り&質疑応答
   - データを用いたグループ実習
 
 ---
-## 本授業の進め方と注意
+## 本授業の進め方とお願い
 
 
 - 全体的に密度が高く、カバーする量も多めです。
@@ -91,11 +101,17 @@ name: logistics
 ---
 ## 参考文献
     
-- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  連載第１回
-  - 本講義の内容は連載第１回を書籍向けに拡充したものとなる。
+- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第二章
+  - 経済セミナー連載記事に基づき、現在書籍化進行中！
+  
+  
 - Croissant ["Estimation of Random Utility Models in R: The mlogit Package"](https://www.jstatsoft.org/article/view/v095i11) *Journal of Statistical Software*
+
+
 - Train ["Discrete Choice Methods with Simulation"](https://eml.berkeley.edu/books/choice2.html) 
   - 特にChapter 2,3, and 6
+
+
 - ダハナ・勝又「Rによるマーケティング・データ分析」第５章
 
 
@@ -146,16 +162,15 @@ name: logistics
 
 -   消費者 $i$ が製品 $j$ から得られる効用
     $$u_{ij}=\alpha p_{j}+\beta X_{j}+\epsilon_{ij}$$
-    -   $p_{j}$: 価格
-    -   $X_{j}$: 製品の属性・特徴のベクトル。
+    -   $p_{j}$: 価格, $X_{j}$: 製品の属性・特徴のベクトル。
     -   $(\alpha,\beta)$: 選好パラメタ
-    -   $\epsilon_{ij}$: 個人かつ製品レベルの**ランダムな**選好ショック
+    -   $\epsilon_{ij}$: 個人かつ製品レベルの**ランダムな**選好ショック。価格や製品属性で捉えられない要素、言わば誤差項として考える。
 
 
 ---
 ## 簡単な例１：iPhoneの購入
 
-- 以下の効用関数を考えよう 
+- 以下の効用関数を考えよう (選好ショックは捨象)
 $$u_{ij} = -2 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時間)$$
 
 - 以下の三機種を比較しよう
@@ -187,11 +202,19 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 - ポイント：人々の「好み」によって、選択は異なってくる！！
 
 ---
-## 離散選択問題の定式化
+## 離散選択問題のより一般的な定式化
 
 
--   以下のようにノーテーションを定義 $$u_{ij}=V_{j}+\epsilon_{ij}$$ 
-  - $V_{j}=\alpha p_{j}+\beta X_{j}$.
+-   以下のように効用を定義 $$u_{ij}=V_{ij}+\epsilon_{ij}$$ 
+
+
+- $V_{ij}$は製品属性や消費者属性に依存する。
+  - 例1: $V_{ij} = \alpha p_j + \beta X_j$ 
+  - 例2: $V_{ij} = (\alpha_0 + \alpha z_i ) p_j + \beta X_j$, ここで $z_i$は消費者属性(例えば所得)
+
+
+- $\epsilon_{ij}$ は選好ショック
+
 
 
 -   消費者 $i$ は最も高い効用が得られる製品・選択肢 $j$ を一つ選ぶ。
@@ -201,7 +224,7 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 ---
 ## 離散選択問題から選択確率の導出
 
-- 消費者は効用の要素を把握した上で選択 -> 決定論的選択
+- 消費者は効用の全て要素を把握した上で選択 -> 決定論的選択
 
 
 - しかしながら、分析者には選好ショック $\{\epsilon_{ij}\}_{j=1}^{J}$ は観察できない。(いわゆる誤差項)
@@ -217,14 +240,23 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 
 
 ---
-## 離散選択モデルのVariant
+## 離散選択モデルのバラエティについて
 
-- fafafa
+- 二項ロジット・プロビットモデル：選択肢が２個 $(J=2)$ の場合
 
----
-## 二項ロジット・プロビットモデル
 
-- 
+- 多項ロジットモデル： 選択肢の個数が２以上の場合
+
+
+- ランダム係数ロジットモデル：効用パラメタの係数が何ら頭の分布に従う場合
+
+
+- その他(本日は割愛)：
+  - ネスト型ロジットモデル
+  - 順序ロジット・プロビットモデル
+  - 多項プロビットモデル：多項ロジットよりも計算が非常に複雑
+  - BLPモデル
+
 
 ---
 ## 多項ロジットモデル
@@ -236,21 +268,69 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 
 
 -   この分布の元で、選択確率は
-    $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
+    $$\mathrm{Pr}\left(d_{i}=j \right)=\frac{\exp(V_{ij})}{\sum_{k=1}^{J} \exp(V_{ik})}$$
     -   **ロジット確率**とも呼ばれる。
     - 導出はTrainのChapter 3を参照。
 
 
 ---
-## モデルの利用方法
+## 単純化としての二項ロジット
 
-- 予測
-- 限界効果(パラメタの解釈)
-- パラメタの解釈：Willingness-to-pay (もしできればConsumer Surplusも説明する?)
+- 選択肢が２個 $(J=2)$ の場合を考える。
 
+
+- 二項ロジットモデル：
+    $$\mathrm{Pr}\left(d = 1 \right)=\frac{\exp(V_{i1})}{\exp(V_{i1})+\exp(V_{i2})}$$
+
+- 二項プロビットモデル： $\epsilon_{i,j}$ が i.i.d. の標準正規分布に従うと考える。
+
+
+- 二項ロジット・プロビット(と最尤法)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
 
 ---
-## モデルがあると何が嬉しいか？
+## 離散選択モデルの応用
+
+- 以下のモデルを考えよう。
+    $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
+
+- モデルの使い方
+  - 限界効果
+  - パラメタの解釈と支払い意思額
+  - 予測
+
+---
+## 利用方法１：限界効果
+
+- 線形回帰モデルと異なり、係数そのものは左辺への限界効果ではない。
+
+- ロジットモデルにおける限界効果は
+$$
+\frac{\partial Pr(d=j)}{\partial p_{j}}=Pr(d=j)\left(1-Pr(d=j)\right)\times\alpha
+$$
+
+- 応用例：自己価格弾力性
+$$
+\frac{\partial Pr(d=j)}{\partial p_{j}} \frac{p_j}{Pr(d=j)}=\left(1-Pr(d=j)\right)\times\alpha p_j
+$$
+  - 価格が1%変化したときに、需要が何％変化するか？
+  
+
+---
+## 利用方法２：パラメタの解釈と支払い意思額
+
+- 効用の中に価格が入っている場合、製品属性への支払い意思額を計算することが可能。
+
+
+- 例： $V_j = \alpha p_j + \beta size_j$ とする。$p_j$ は価格、 $size_j$ はモニターサイズ(単位：インチ)。
+
+
+- モニターサイズ 1インチへの支払い意思額は 
+$$ \frac{\beta}{|\alpha|}$$
+
+- 考え方： $size_j$を増加させたとき、効用を一定水準に保つには価格 $p_j$ がどの程度動く必要があるか、を捉えている。
+
+---
+## 利用方法３：モデルを用いた予測
 
 - ロジットモデル再掲
     $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
@@ -264,6 +344,7 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 - 例２：新製品を導入したらどうなるか？
   - 例えば、iPhone Max という $J+1$ 番目の新製品 $\{p_{J+1}, X_{J+1}\}$
   - 新しい製品の需要予測、そして既存の製品への影響を予測できる。
+  
   
   
 ---
@@ -357,13 +438,13 @@ name: logistics
 ---
 ## レクチャーで使うデータ
 
-- 2023年春学期「産業組織論」＠早稲田大学政治経済学部で行ったアンケート結果を利用。
+- 2024年春学期「産業組織論」＠早稲田大学政治経済学部で行ったアンケート結果を利用。
 
 
 - アンケートでは上述の選択肢問題に加えて、消費者属性についての設問も。
 
 
-- トピックス・レクチャーの実習(後半パート)において、RAブートキャンプ参加者に回答してもらったアンケートデータを使った演習を行う。
+- 演習において、RAブートキャンプ参加者に回答してもらったアンケートデータを用いた分析を行う。
 
 ---
 ## 結果を見る前に：選択型コンジョイント分析
@@ -416,14 +497,13 @@ library("tidyverse")
 library("knitr")
 library("mlogit") # ロジットモデル推定のためのパッケージ
 library("stargazer") # 推定結果の表作成
-library("optimx") # 数値最適化のためのパッケージ
 ```
 
 ---
 ## 【R分析】データの読み込み
 
 ```{r}
-data <- readr::read_csv("data/KTSurvey_Spring2023_cleaned.csv")
+data <- readr::read_csv("data/KinokoTakenokoSurvey_IOSpring2024.csv")
 ```
 
 ```{css, echo = F}
@@ -676,11 +756,15 @@ data_for_estimation %>%
 
 - 現在のデータの各行は、各個人が各設問においてどう行動したかを示している。
 
+
 - 変数`choiceid`は、このような「選択の状況」を示すIDとなっている。
   - 構築としては、単純に上から下まで連番を振ればよい。
 
 ```{r}
 data_for_estimation$choiceid <- 1:nrow(data_for_estimation)
+
+# slide_4_code_scratch.RMDのために保存
+write_csv(file = "intermediate/data_for_estimation.csv", x = data_for_estimation)
 ```
 
 
@@ -712,7 +796,7 @@ datalogit <- dfidx(data = as.data.frame(data_for_estimation),
 - `opposite`: 効用関数において符号がマイナスにはいるような変数の指定。今回は`price`.
 
 ---
-## 【R分析】新しいデータセットにおけるインデックス情報
+## 【R分析】新しいデータセットのインデックス情報
 
 ```{r}
 head(datalogit$idx)
@@ -750,19 +834,212 @@ stargazer::stargazer(multilogit, type = "text")
 ---
 class: title-slide-section, center, middle
 name: logistics
-# 拡張：消費者属性の追加
+# 拡張１：消費者属性の追加
 
 
 ---
-## 拡張：消費者属性
+## 消費者属性
 
-消費者属性を入れたらどうなるか？？？
+- サーベイでは消費者属性についても質問している。
+  - 年齢、性別、出身地、などなど
 
+
+- きのこの山・たけのこの里への選好や価格の反応度はこれらにも依存するかもしれない。
+
+
+- これらの要素を取り込んだ多項ロジットモデルの推定を行おう。
+
+
+---
+## 【R分析】消費者属性の記述統計準備
+
+```{r}
+# 回答者の属性の比率を表にするためのデータ整形
+data %>%
+  mutate(gender =　case_when(gender == "1 : 男性" ~ "男性", 
+                             gender == "2 : 女性" ~ "女性",
+                            gender == "3 : 回答したくない" ~ "未回答"),
+          exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
+                              experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
+                              experience == "3 : １年以上前" ~ "１年以上前",
+                              experience == "4 : 食べたことがない" ~ "食べたことがない"),
+          adult = if_else(age>=20, "成人", "未成年"),
+    region =  case_when(region == "1 : 北海道地方" ~ "関東", 
+                              region == "2 : 東北地方" ~ "関東", 
+                              region == "3 : 関東地方" ~ "関東" ,
+                              region == "4 : 中部地方" ~ "関東",
+                              region == "5 : 近畿地方" ~ "関西",
+                              region == "6 : 中国地方" ~ "関西",
+                              region == "7 : 四国地方" ~ "関西",
+                              region == "8 : 九州地方(沖縄含む)" ~ "関西",
+                              region == "9 : 海外" ~ "海外"),
+    familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない")) -> data_atr
+
+
+```
+
+
+---
+
+```{r}
+
+# 地域
+data_atr %>%
+  group_by(region) %>%
+  tally() %>%
+  mutate(割合 = n/N) %>% 
+  select (-n) %>%
+  mutate(変数 = c("出身地方","","")) %>%
+  rename(属性 = region) %>%
+  select(変数, everything()) ->region_fig
+
+# 性別
+data_atr %>%
+  group_by(gender) %>%
+  tally() %>%
+  mutate( 割合 = n/N) %>% 
+  select(-n) %>%
+  mutate(変数 = c("性別","", "")) %>%
+  rename(属性 = gender) %>%
+  select(変数, everything()) ->gender_fig
+
+```
+
+---
+
+```{r}
+# 実家
+data_atr %>%
+  group_by(familyhouse) %>%
+  tally() %>%
+  mutate( "割合" = n/N) %>% 
+  select(-n) %>%
+  mutate("変数" = c("実家暮らしかどうか","")) %>%
+  rename(属性 = familyhouse) %>%
+  select(変数, everything(),) ->　fam_fig
+
+# 成人
+data_atr %>%
+  group_by(adult) %>%
+  tally() %>%
+  mutate( 割合 = n/N) %>% 
+  select(-n) %>%
+  mutate(変数 = c("成人かどうか","")) %>%
+  rename(属性 = adult) %>%
+  select(変数, everything()) ->adult_fig
+
+```
+
+
+---
+class: smalltable
+
+```{r}
+rbind(gender_fig,adult_fig, fam_fig, region_fig)  %>%
+  knitr::kable( digits = 2) -> tab_atr
+
+tab_atr
+```
+
+---
+## 推定のためのデータセット
+
+```{r}
+
+data_for_estimation %>% 
+  mutate( gender =　case_when(gender == "1 : 男性" ~ "0", 
+                              gender == "2 : 女性" ~ "female",
+                              gender == "3 : 回答したくない" ~ "0"),
+          exp    =  case_when(experience == "1 : 過去半年以内" ~ "halfyear", 
+                              experience == "2 : 過去半年から１年以内" ~ "half_to_1year", 
+                              experience == "3 : １年以上前" ~ "0" ),
+          adult = if_else(age>=20, 1, 0),
+          region =  case_when(region == "1 : 北海道地方" ~ "_Kanto", 
+                              region == "2 : 東北地方" ~ "_Kanto", 
+                              region == "3 : 関東地方" ~ "_Kanto" ,
+                              region == "4 : 中部地方" ~ "_Kanto",
+                              region == "5 : 近畿地方" ~ "Kansai",
+                              region == "6 : 中国地方" ~ "Kansai",
+                              region == "7 : 四国地方" ~ "Kansai",
+                              region == "8 : 九州地方(沖縄含む)" ~ "Kansai",
+                              region == "9 : 海外" ~ "Oversea",
+          )
+  ) -> data_for_estimation
+
+```
+
+---
+```{r}
+datalogit <- dfidx(data = as.data.frame(data_for_estimation),
+                   choice = "choice", 
+                   varying = 9:17, 
+                   sep = "_",
+                   idx = list(c("choiceid", "ID")), 
+                   idnames = c("chid", "alt"),
+                   opposite = c("price"))
+
+```
+
+
+
+---
+## 消費者属性入りの定式化
+
+- 価格の係数及びきのこ・たけのこ係数が、消費者属性 $z_i$ に依存すると考える。
+
+$$
+\begin{aligned}
+U_{i, k, Kinoko} &=\alpha_{Kinoko }(z_i) - \beta_{Kinoko}(z_i) p_{k, Kinoko} +\epsilon_{i, k, Kinoko} \\
+U_{i, k, Takenoko} &=\alpha_{Takenoko }(z_i)- \beta_{Takenoko}(z_i) p_{k, Takenoko}+\epsilon_{i, k,Takenoko} \\
+U_{i, k, outside} &= \epsilon_{i, k, other}
+\end{aligned}
+$$
+- ここで、係数は以下のように与える
+$$
+\begin{aligned}
+\alpha(z_{i})	&=	\alpha_{0}+\sum_{d=1}^{D}\alpha_{d}z_{di} \\
+\beta_{j}(z_{i})	&=	\beta_{0,j}+\sum_{d=1}^{D}\beta_{d,j}z_{di}, j\in \{Kinoko, Takenoko \} 
+\end{aligned}
+$$
+  - $z_{di}$ は消費者 $i$ の属性 $d$ (成人ダミーなど)
+
+---
+## 【R分析】消費者属性入りの多項ロジットモデル推定
+
+```{r}
+with_atr <- formula(choice ~price+Kinoko+Takenoko+
+                      price:gender+Takenoko:gender+Kinoko:gender+ 
+                      price:familyhouse+Takenoko:familyhouse+Kinoko:familyhouse+
+                      price:adult+Takenoko:adult+Kinoko:adult+
+                      price:region+Takenoko:region+Kinoko:region | 0 | 0) # 式が長いので事前に格納
+
+ml_consumer_atr <- mlogit(formula = with_atr, 
+                          data = datalogit,
+                          reflevel = '0')
+```
+
+- `gender`: 女性ダミー、 `familyhouse` : 実家ダミー、`adult`: 成人ダミー、 `region`: 地域（関西、海外）
+
+---
+## 推定結果の出力
+
+```{r, eval=FALSE}
+stargazer::stargazer(multilogit,ml_consumer_atr,
+                     single.row=TRUE,type="text",align = TRUE)
+```
+
+---
+## 推定結果
+
+```{r, eval=TRUE, echo=FALSE}
+stargazer::stargazer(multilogit,ml_consumer_atr,
+                     single.row=TRUE,type="text",align = TRUE)
+```
 
 ---
 class: title-slide-section, center, middle
 name: logistics
-# ランダム係数ロジットモデル
+# 拡張２：ランダム係数ロジットモデル
 
 ---
 ## 離散選択モデル：ランダム係数ロジットモデル
@@ -779,11 +1056,14 @@ $$
 
 - ここで、
   -   $\alpha_{i, j} \sim N\left(\theta_{j}, \sigma_{j}^{2}\right)$ for $j \in\{$ Kinoko, Takenoko $\}$
-  -   $\beta_{i} \sim \log N\left(\theta_{\beta}, \sigma_{\beta}^{2}\right) .$
+  -   $\beta_{i} \sim N\left(\theta_{\beta}, \sigma_{\beta}^{2}\right) .$
 
 
 - これらの分布のパラメタを推定する。
   - 技術的な詳細は補足資料を参照(少し難しめ)
+  
+  
+- 注：消費者属性も加味可能だが講義では省略。(実証ビジエコ第２章を参照)
 
 
 ---
@@ -793,7 +1073,7 @@ $$
 rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0, 
                     data = datalogit, 
                     panel = TRUE, 
-                    rpar = c(price = "ln", Kinoko = "n", Takenoko = "n") , 
+                    rpar = c(price = "n", Kinoko = "n", Takenoko = "n") , 
                     R = 50, 
                     correlation = FALSE)
 ```
@@ -807,6 +1087,22 @@ rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0,
 ```{r, eval = FALSE}
 stargazer::stargazer(multilogit, rcdclogit, type="text")
 ```
+
+
+---
+## 【参考】乱数のドロー数
+
+- 乱数のドロー数を便宜上50としているが、これは少なすぎる。
+
+
+- ドロー数が多いとより正確。ただし、計算時間(推定時間)が長くなる。
+
+
+- 推定結果がドロー数によってあまり変化しなくなるくらい大きい値にするのが重要。
+
+
+- なお、ガウス求積など、正確な値を得つつ、計算負荷を下げる方法もある。(興味ある人は個人的に)
+
 
 
 ---
@@ -876,8 +1172,8 @@ plot(p1)
 
 ```{r}
 p2 <- ggplot(data = data.frame(x = c(0.05, 0.3) ), aes(x)) +
-  stat_function(fun = dlnorm, n = 101, 
-                args = list(mean = dist_price$mean, sd = dist_price$sigma), colour = "red" ) + 
+  stat_function(fun = dnorm, n = 101, 
+                args = list(mean = dist_price$mean, sd = abs(dist_price$sigma)), colour = "red" ) + 
   ylab("") +
   scale_y_continuous(breaks = NULL) + ggtitle("Beta (price coefficient)")
 ```
@@ -902,7 +1198,7 @@ name: logistics
 ---
 ## 需要曲線のプロット
 
-- ランダム係数ロジットモデルの推定結果にもとづいて、需要曲線をプロットする。
+- ランダム係数ロジットモデル(消費者属性なし)の推定結果にもとづいて、需要曲線をプロットする。
 
 
 - 解釈：推定しているものは消費者の選択確率のモデル。しかしながら、選択確率＝市場シェアと解釈可能。
@@ -935,7 +1231,7 @@ R = 1000
 # 消費者のパラメタを、乱数によって発生させる。
 alpha_Kinoko_vec = rnorm(n = R, mean = dist_Kinoko$mean, sd = abs(dist_Kinoko$sigma) )
 alpha_Takenoko_vec = rnorm(n = R, mean = dist_Takenoko$mean, sd = abs(dist_Takenoko$sigma) )
-beta_vec  = rlnorm(n = R, mean = dist_price$mean, sd = abs(dist_price$sigma) )
+beta_vec  = rnorm(n = R, mean = dist_price$mean, sd = abs(dist_price$sigma) )
 ```
 
 ---

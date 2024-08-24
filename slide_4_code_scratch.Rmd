@@ -67,8 +67,22 @@ $$\log L(\theta)= \sum_{i=1}^{N} \sum_{k=1}^{5} \log P_{k}\left(j=y_{i,k}|\theta
 ---
 ## 【R分析】下準備
 
+
+```{r}
+rm(list = ls())
+library("tidyverse")
+library("knitr")
+library("mlogit") # ロジットモデル推定のためのパッケージ
+library("stargazer") # 推定結果の表作成
+library("optimx") # 数値最適化のパッケージ
+```
+
+
 - `slide_1_lecture.RMD` で作成した `data_for_estimation` を以下では利用する。
 
+```{r}
+data_for_estimation <- read_csv("intermediate/data_for_estimation.csv")
+```
 
 ---
 ## 【R分析】ロジット確率計算のための関数
@@ -95,7 +109,7 @@ f_logit_prob <- function(alpha_Kinoko, alpha_Takenoko, beta, price_Kinoko, price
 
 - 関数`f_logit_prob`は上で定義済み。
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 f_likelihood_logit <- function(param, data){
 
   alpha_Kinoko <- param[1]
@@ -113,7 +127,7 @@ f_likelihood_logit <- function(param, data){
 ---
 ## 【R分析】続き
 
-```{r, eval= TRUE}
+```{r, eval= FALSE}
 
   pred <- rbind(P1, P2, P3, P4, P5)
   pred <- as_tibble(pred)
@@ -300,7 +314,6 @@ ini <- c(5,5, -0.01)
 # 最適化
 result <- optimx( par = ini, 
                   fn = f_likelihood_logit, 
-                  method="Nelder-Mead", 
                   data = data_for_estimation, 
                   control = list(fnscale=-1), 
                   hessian = TRUE  )
@@ -435,7 +448,7 @@ $$ase(\hat{\theta})=\sqrt{diag(\frac{1}{n}\hat{A}^{-1})}$$
 - `optimx`には、`gHgen`というヘシアンを数値計算する関数が存在する。
 
 ```{r, cache = FALSE}
-Hessian <- gHgen(par = as.numeric(result[2,1:3]), 
+Hessian <- gHgen(par = as.numeric(result[1,1:3]), 
                  fn = f_likelihood_logit, 
                  data = data_for_estimation)
 se_vec <- round(sqrt(diag(solve(-Hessian$Hn))), 3)
