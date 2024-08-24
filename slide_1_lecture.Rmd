@@ -1,8 +1,8 @@
 ---
-title: '構造推定入門: 講義スライド'
+title: '離散選択モデル: 講義編'
 subtitle: '応用社会科学RAブートキャンプ'
 author: '講師: 遠山祐太 (早稲田大学)'
-date: '最終更新: `r Sys.time()`'
+date: '最終更新: `r format(Sys.time(), format = "%Y-%m-%d %X")`'
 output:
   xaringan::moon_reader:
     css: xaringan-themer.css
@@ -33,28 +33,58 @@ name: logistics
   - 京大経済→東大院修士（公共政策→経済学）→Ph.D留学
   - 米国ノースウェスタン大学で Ph.D. in Economics 取得
   - 帰国後、2018年9月より早稲田大学政治経済学部准教授
-  - その他のお仕事：UTEconアドバイザー
+  - 大学外のお仕事：UTEconアドバイザー、など
   
 
-- 研究・教育：産業組織論、応用計量経済学、エネルギー・環境経済学
+- 研究・教育：実証産業組織論、エネルギー・環境経済学、応用計量経済学
 
 
 ---
-## 今日のプランと参考文献
+## テーマ：離散選択モデルの推定
 
-- 前半（１３時半から１５時）：
-  1. イントロダクション：構造推定とは？（１５分）
-  2. 離散選択モデルと最尤法の導入（２０分）
-  3. 事例：きのこの山 VS たけのこの里（２５分）
-  4. コード：`mlogit`パッケージを使った推定（３０分）
+- 離散選択モデル：**離散変数**の決定に関するモデル
+  - Yes or No (二項選択)
+  - 複数の選択肢からどれを選ぶか(多項選択)
+  - 順序を伴う選択肢：悪い<普通<良い
 
 
-- 後半（１５時半から１７時）：
-  5. コード：パッケージを使わずに最尤推定をプログラミング（３０分）
-  6. 演習：データを用いた実習（６０分）
+- 特徴１：応用範囲が非常に広い
+  - マーケティング・消費者行動：どの財を購入するか？
+  - 交通：通勤経路の選択（電車・バス・自家用車）
+  - 労働・教育：どの学校に出願するか？ いつ引退するか？
+  - 政治経済学：誰に投票するか？
+
+
+- 特徴２：経済学モデルと密接な繋がりを持つ
+
+
 
 ---
-## 本授業の進め方と注意
+## 講義の目標
+
+
+- 目標１：離散選択モデルによって、どのような分析ができるかを学ぶ。
+
+
+- 目標２：パッケージを利用した離散選択モデルの推定の基礎を学ぶ。
+
+
+---
+## 今日のプラン
+
+- １コマ目（１３時半から１５時）：講義パート
+  - イントロダクション（５分）
+  - 離散選択モデルと最尤法の導入（３０分）
+  - 事例：きのこの山 VS たけのこの里（１０分）
+  - コーディング：`mlogit`パッケージによる推定（４５分）
+
+
+- ２コマ目（１５時半から１７時）：演習パート
+  - 講義パートの残り&質疑応答
+  - データを用いたグループ実習
+
+---
+## 本授業の進め方とお願い
 
 
 - 全体的に密度が高く、カバーする量も多めです。
@@ -68,176 +98,22 @@ name: logistics
   - 「【参考】」：計量経済学の知識が必要な点。ひとまず割愛してOK
 
 
-
-
 ---
 ## 参考文献
     
-- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  連載第１回
-  - 本講義の内容は連載第１回を書籍向けに拡充したものとなる。
+- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第二章
+  - 経済セミナー連載記事に基づき、現在書籍化進行中！
+  
+  
 - Croissant ["Estimation of Random Utility Models in R: The mlogit Package"](https://www.jstatsoft.org/article/view/v095i11) *Journal of Statistical Software*
+
+
 - Train ["Discrete Choice Methods with Simulation"](https://eml.berkeley.edu/books/choice2.html) 
   - 特にChapter 2,3, and 6
-- Adams, Clarke, and Quinn "Microeconometrics and Matlab"
+
+
 - ダハナ・勝又「Rによるマーケティング・データ分析」第５章
 
-
----
-class: title-slide-section, center, middle
-name: logistics
-# 構造推定アプローチとは？
-
-
----
-## 構造推定(Structural Estimation)とは？
-
-- 構造推定: 経済主体の意思決定モデルを活用した実証分析のアプローチ
-
-
-- 手順
-  - Step 1: 分析したい経済現象に関する経済モデルを構築する。
-  - Step 2: 経済モデル内のパラメタを、データを用いて推定する。
-  - Step 3: 推定したモデルを用いて、**反実仮想 (counterfactual)**シミュレーションを行う。
-
-
-  
-  
----
-## 構造推定の例：価格付け
-
-- 問：企業が自社製品の価格付けを検討している。どうすればよいか？
-
-- Step 1：以下の利潤最大化問題を考えよう。
-$$\max_{p} \ (p-mc) D(p)$$
-  - $p$：価格、 $mc$: 限界費用(＝単位費用), $D(p)$: 需要関数
-  
-  
-
-- Step 2: 需要関数 $D(p)$ と 限界費用 $mc$ を知りたい。
-  - 線形な需要関数を考えて、(操作変数法などで)推定する
-$$ Q_t = \alpha_0 + \alpha_1 \cdot P_t + \beta \cdot income_t + \epsilon_t $$
-  -  限界費用は(1) 企業の内部情報、(2) 計量経済学的に推定する (詳細は割愛)
-  
-  
-- Step 3: 利潤を最大にするような価格を探す！（数値計算）
-
----
-## 価格付け分析の実例
-
-- 例１：Ziprecruiter.com の価格付け実験
-  - 米国のオンライン求人サイトが、求人企業の月会費の改定を検討。
-  - シカゴ大学の研究者と共同して需要測定のためのA/Bテストを実行。
-  - 分析から、価格の最適化により収入を約６０％改善できることが判明。
-  - 実際に、価格を９９ドルから２４９ドルへ改定。
-  
-  
-- 例２：[バッファローのnasne](https://www.buffalo.jp/contents/topics/special/nasne-pricing-int/)の価格付け
-  - ネットワークレコーダーの新製品に関する価格付けの検討。
-  - UTEconが、販売予測モデルの構築に携わる。
-  - 販売価格29800円が「スイートスポット」にはまり、売れ行きは好調だった。
-  
-  
-- 両事例の詳細については[こちら](https://yutatoyama.github.io/files/lecture_Tachikawa_20221027_public.pdf)を参照。
-  
-  
----
-## 構造推定の例：企業合併分析
-
-- 問：自動車市場において、トヨタとホンダが合併を検討している。この合併を許すべきか？
-
-
-
-- 論点：
-  - (-) 寡占化の進行。競争がなくなって、価格が上がるかも。
-  - (+) 新企業の効率化。規模の経済、ノウハウの共有など。
-    
-
-- 重要性：大型の企業合併は公正取引委員会により事前審査が求められる。
-
----
-## 合併シミュレーション
-
-- 構造推定による分析ステップ：
-  1. 企業間の競争モデルを構築する（例：ベルトラン競争）
-  2. モデルの要素（需要関数・費用関数）をデータから推定する。
-  3. 仮に合併が起きた場合にどのような価格付けになるかをシミュレーションする。
-  
-  
-- **合併シミュレーション**と呼ばれ、独禁法実務においても活用されている。
-  - 例：[公取委「平成２８年度における主要な企業結合事例」](https://www.jftc.go.jp/dk/kiketsu/jirei/28nendo_files/170614.pdf) の「出光興産㈱による昭和シェル石油㈱の株式取得及びＪＸホールディングス㈱による
-東燃ゼネラル石油㈱の株式取得 」
-
-
-- 学術研究の事例は[こちら](https://sites.google.com/view/keisemi-ebiz/%E7%AC%AC4%E5%9B%9E?authuser=0)の補足資料
-  - [Fan (2013)](https://www.aeaweb.org/articles?id=10.1257/aer.103.5.1598) 
-  - [Wollmann (2018)](https://www.aeaweb.org/articles?id=10.1257/aer.20160863) 
-
-
----
-## その他の例 (私の研究関連) 
-
-- 環境政策：排出権取引の政策ルールを変更したら、どのような均衡が実現するか？
-  - 参考：[こちら](https://www.web-nippyo.jp/17662/)に[Fowlie, Reguant, and Ryan (2016)](https://www.journals.uchicago.edu/doi/10.1086/684484)の解説記事
-  
-  
-- 政治経済学: 「もし全員が投票」したら、選挙結果はどのように変化するか？
-  - 投票行動モデルを構築し、選好と投票コストを推定。そのうえでシミュレーション
-  - [Kawai, Toyama, and Watanabe (2021)](https://www.aeaweb.org/articles?id=10.1257/mic.20190063&&from=f) を参照。
-
----
-## 構造推定の強み・弱み
-
-- 強み：経済モデルを用いたシミュレーションができる。
-  - 例：ある政策の代わりに別の政策が行われたらどうなっていたか？
-  - 例：意思決定におけるあるメカニズム・チャネルを捨象した場合、どうなるか？
-  - 因果効果・政策効果の推定の一手段
-  - 経済的に関心があるアウトカム（特に経済厚生）を見ることができる。
-
-
-- 弱み：経済モデルに強く依拠している。
-  - 仮定が強い。
-  - 分析が複雑になることが多い（プログラミングなど）
-
-
-- 補足資料にて、構造推定アプローチと誘導形アプローチの議論についてもう少し詳しく説明。
-
-
----
-## 今回の例：離散選択モデル
-
-- 本レクチャーでは、**離散選択モデル**を題材として構造推定を紹介する。
-
-
-- 理由１：応用範囲が非常に広い
-  - マーケティング：どの財を購入するか？
-  - 交通：通勤経路の選択（電車・バス・自家用車）
-  - 労働・教育：どの学校に出願するか？ いつ引退するか？
-  - 政治経済学：誰に投票するか？
-  - 産業組織論：市場に参入するか否か（ゲーム理論的モデル）
-
-
-- 理由２：モデル・計量分析・プログラミングともに比較的シンプル
-
-
-- 理由３：私が一番好きな経済モデルだから。
-
-
-
----
-## これからの流れ
-
-- 離散選択モデルの導入：モデルと推定方法
-
-
-- アンケートデータに基づく応用事例：きのこの山VSたけのこの里
-
-
-- パッケージを用いた離散選択モデルの推定
-
-  
-- パッケージを利用しないモデルの推定
-  - 尤度関数の定義
-  - 数値最適化による尤度関数の最大化
 
 ---
 class: title-slide-section, center, middle
@@ -286,16 +162,15 @@ name: logistics
 
 -   消費者 $i$ が製品 $j$ から得られる効用
     $$u_{ij}=\alpha p_{j}+\beta X_{j}+\epsilon_{ij}$$
-    -   $p_{j}$: 価格
-    -   $X_{j}$: 製品の属性・特徴のベクトル。
+    -   $p_{j}$: 価格, $X_{j}$: 製品の属性・特徴のベクトル。
     -   $(\alpha,\beta)$: 選好パラメタ
-    -   $\epsilon_{ij}$: 個人かつ製品レベルの**ランダムな**選好ショック
+    -   $\epsilon_{ij}$: 個人かつ製品レベルの**ランダムな**選好ショック。価格や製品属性で捉えられない要素、言わば誤差項として考える。
 
 
 ---
 ## 簡単な例１：iPhoneの購入
 
-- 以下の効用関数を考えよう 
+- 以下の効用関数を考えよう (選好ショックは捨象)
 $$u_{ij} = -2 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時間)$$
 
 - 以下の三機種を比較しよう
@@ -327,11 +202,19 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 - ポイント：人々の「好み」によって、選択は異なってくる！！
 
 ---
-## 離散選択問題の定式化
+## 離散選択問題のより一般的な定式化
 
 
--   以下のようにノーテーションを定義 $$u_{ij}=V_{j}+\epsilon_{ij}$$ 
-  - $V_{j}=\alpha p_{j}+\beta X_{j}$.
+-   以下のように効用を定義 $$u_{ij}=V_{ij}+\epsilon_{ij}$$ 
+
+
+- $V_{ij}$は製品属性や消費者属性に依存する。
+  - 例1: $V_{ij} = \alpha p_j + \beta X_j$ 
+  - 例2: $V_{ij} = (\alpha_0 + \alpha z_i ) p_j + \beta X_j$, ここで $z_i$は消費者属性(例えば所得)
+
+
+- $\epsilon_{ij}$ は選好ショック
+
 
 
 -   消費者 $i$ は最も高い効用が得られる製品・選択肢 $j$ を一つ選ぶ。
@@ -341,7 +224,7 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 ---
 ## 離散選択問題から選択確率の導出
 
-- 消費者は効用の要素を把握した上で選択 -> 決定論的選択
+- 消費者は効用の全て要素を把握した上で選択 -> 決定論的選択
 
 
 - しかしながら、分析者には選好ショック $\{\epsilon_{ij}\}_{j=1}^{J}$ は観察できない。(いわゆる誤差項)
@@ -357,6 +240,25 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 
 
 ---
+## 離散選択モデルのバラエティについて
+
+- 二項ロジット・プロビットモデル：選択肢が２個 $(J=2)$ の場合
+
+
+- 多項ロジットモデル： 選択肢の個数が２以上の場合
+
+
+- ランダム係数ロジットモデル：効用パラメタの係数が何ら頭の分布に従う場合
+
+
+- その他(本日は割愛)：
+  - ネスト型ロジットモデル
+  - 順序ロジット・プロビットモデル
+  - 多項プロビットモデル：多項ロジットよりも計算が非常に複雑
+  - BLPモデル
+
+
+---
 ## 多項ロジットモデル
 
 
@@ -366,13 +268,69 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 
 
 -   この分布の元で、選択確率は
-    $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
+    $$\mathrm{Pr}\left(d_{i}=j \right)=\frac{\exp(V_{ij})}{\sum_{k=1}^{J} \exp(V_{ik})}$$
     -   **ロジット確率**とも呼ばれる。
     - 導出はTrainのChapter 3を参照。
 
 
 ---
-## モデルがあると何が嬉しいか？
+## 単純化としての二項ロジット
+
+- 選択肢が２個 $(J=2)$ の場合を考える。
+
+
+- 二項ロジットモデル：
+    $$\mathrm{Pr}\left(d = 1 \right)=\frac{\exp(V_{i1})}{\exp(V_{i1})+\exp(V_{i2})}$$
+
+- 二項プロビットモデル： $\epsilon_{i,j}$ が i.i.d. の標準正規分布に従うと考える。
+
+
+- 二項ロジット・プロビット(と最尤法)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
+
+---
+## 離散選択モデルの応用
+
+- 以下のモデルを考えよう。
+    $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
+
+- モデルの使い方
+  - 限界効果
+  - パラメタの解釈と支払い意思額
+  - 予測
+
+---
+## 利用方法１：限界効果
+
+- 線形回帰モデルと異なり、係数そのものは左辺への限界効果ではない。
+
+- ロジットモデルにおける限界効果は
+$$
+\frac{\partial Pr(d=j)}{\partial p_{j}}=Pr(d=j)\left(1-Pr(d=j)\right)\times\alpha
+$$
+
+- 応用例：自己価格弾力性
+$$
+\frac{\partial Pr(d=j)}{\partial p_{j}} \frac{p_j}{Pr(d=j)}=\left(1-Pr(d=j)\right)\times\alpha p_j
+$$
+  - 価格が1%変化したときに、需要が何％変化するか？
+  
+
+---
+## 利用方法２：パラメタの解釈と支払い意思額
+
+- 効用の中に価格が入っている場合、製品属性への支払い意思額を計算することが可能。
+
+
+- 例： $V_j = \alpha p_j + \beta size_j$ とする。$p_j$ は価格、 $size_j$ はモニターサイズ(単位：インチ)。
+
+
+- モニターサイズ 1インチへの支払い意思額は 
+$$ \frac{\beta}{|\alpha|}$$
+
+- 考え方： $size_j$を増加させたとき、効用を一定水準に保つには価格 $p_j$ がどの程度動く必要があるか、を捉えている。
+
+---
+## 利用方法３：モデルを用いた予測
 
 - ロジットモデル再掲
     $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
@@ -388,8 +346,9 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
   - 新しい製品の需要予測、そして既存の製品への影響を予測できる。
   
   
+  
 ---
-## モデルからデータへ：
+## 推定：モデルからデータへ
 
 .middle[
 .center[
@@ -479,13 +438,13 @@ name: logistics
 ---
 ## レクチャーで使うデータ
 
-- 2023年春学期「産業組織論」＠早稲田大学政治経済学部で行ったアンケート結果を利用。
+- 2024年春学期「産業組織論」＠早稲田大学政治経済学部で行ったアンケート結果を利用。
 
 
 - アンケートでは上述の選択肢問題に加えて、消費者属性についての設問も。
 
 
-- トピックス・レクチャーの実習(後半パート)において、RAブートキャンプ参加者に回答してもらったアンケートデータを使った演習を行う。
+- 演習において、RAブートキャンプ参加者に回答してもらったアンケートデータを用いた分析を行う。
 
 ---
 ## 結果を見る前に：選択型コンジョイント分析
@@ -496,9 +455,32 @@ name: logistics
 
 - マーケティング、環境経済学などにおいて幅広く使われている手法。
 
-- 限界点：あくまで仮想の状況であるので「実際の行動」を反映するか否かは要注意。
+- 限界点：あくまで仮想の状況であるので「実際の行動」を反映するか否かは要注意。(次ページ)
 
 - マーケティングにおけるコンジョイント分析の解説として、[Allenby et al "Economic foundations of conjoint analysis" *Handbook of the Economics of Marketing*](https://www.sciencedirect.com/science/article/abs/pii/S2452261919300024)
+
+
+---
+## データの種類と限界点
+
+- 今回用いたサーベイデータを表明選好データ(Stated preference) と呼ぶ。
+  - 仮想のアンケートを用いて、人々の選好に関する情報を収集している。
+  
+  
+- 一方、現実の購買行動データを、顕示選好データ(Revealed preference) と呼ぶ。
+  - POS データ、購買履歴データ、など。
+
+
+- 表明選好データにおいては、常に「その行動が真の行動を反映しているのか？」を考えなければならない。
+
+
+- 同時に、サーベイ一般の問題として、サーベイ対象者が興味ある母集団全体を反映しているのかについても要検討。
+
+
+---
+class: title-slide-section, center, middle
+name: logistics
+# 分析の下準備
 
 
 ---
@@ -515,14 +497,13 @@ library("tidyverse")
 library("knitr")
 library("mlogit") # ロジットモデル推定のためのパッケージ
 library("stargazer") # 推定結果の表作成
-library("optimx") # 数値最適化のためのパッケージ
 ```
 
 ---
 ## 【R分析】データの読み込み
 
 ```{r}
-data <- readr::read_csv("data/KTSurvey_Spring2023_cleaned.csv")
+data <- readr::read_csv("data/KinokoTakenokoSurvey_IOSpring2024.csv")
 ```
 
 ```{css, echo = F}
@@ -630,6 +611,12 @@ tab
 
 
 - 離散選択モデルを使って、より詳しく分析してみよう！
+
+
+---
+class: title-slide-section, center, middle
+name: logistics
+# 多項ロジットモデル
 
 
 ---
@@ -769,11 +756,15 @@ data_for_estimation %>%
 
 - 現在のデータの各行は、各個人が各設問においてどう行動したかを示している。
 
+
 - 変数`choiceid`は、このような「選択の状況」を示すIDとなっている。
   - 構築としては、単純に上から下まで連番を振ればよい。
 
 ```{r}
 data_for_estimation$choiceid <- 1:nrow(data_for_estimation)
+
+# slide_4_code_scratch.RMDのために保存
+write_csv(file = "intermediate/data_for_estimation.csv", x = data_for_estimation)
 ```
 
 
@@ -805,7 +796,7 @@ datalogit <- dfidx(data = as.data.frame(data_for_estimation),
 - `opposite`: 効用関数において符号がマイナスにはいるような変数の指定。今回は`price`.
 
 ---
-## 【R分析】新しいデータセットにおけるインデックス情報
+## 【R分析】新しいデータセットのインデックス情報
 
 ```{r}
 head(datalogit$idx)
@@ -839,6 +830,217 @@ stargazer::stargazer(multilogit, type = "text")
 stargazer::stargazer(multilogit, type = "text")
 ```
 
+
+---
+class: title-slide-section, center, middle
+name: logistics
+# 拡張１：消費者属性の追加
+
+
+---
+## 消費者属性
+
+- サーベイでは消費者属性についても質問している。
+  - 年齢、性別、出身地、などなど
+
+
+- きのこの山・たけのこの里への選好や価格の反応度はこれらにも依存するかもしれない。
+
+
+- これらの要素を取り込んだ多項ロジットモデルの推定を行おう。
+
+
+---
+## 【R分析】消費者属性の記述統計準備
+
+```{r}
+# 回答者の属性の比率を表にするためのデータ整形
+data %>%
+  mutate(gender =　case_when(gender == "1 : 男性" ~ "男性", 
+                             gender == "2 : 女性" ~ "女性",
+                            gender == "3 : 回答したくない" ~ "未回答"),
+          exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
+                              experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
+                              experience == "3 : １年以上前" ~ "１年以上前",
+                              experience == "4 : 食べたことがない" ~ "食べたことがない"),
+          adult = if_else(age>=20, "成人", "未成年"),
+    region =  case_when(region == "1 : 北海道地方" ~ "関東", 
+                              region == "2 : 東北地方" ~ "関東", 
+                              region == "3 : 関東地方" ~ "関東" ,
+                              region == "4 : 中部地方" ~ "関東",
+                              region == "5 : 近畿地方" ~ "関西",
+                              region == "6 : 中国地方" ~ "関西",
+                              region == "7 : 四国地方" ~ "関西",
+                              region == "8 : 九州地方(沖縄含む)" ~ "関西",
+                              region == "9 : 海外" ~ "海外"),
+    familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない")) -> data_atr
+
+
+```
+
+
+---
+
+```{r}
+
+# 地域
+data_atr %>%
+  group_by(region) %>%
+  tally() %>%
+  mutate(割合 = n/N) %>% 
+  select (-n) %>%
+  mutate(変数 = c("出身地方","","")) %>%
+  rename(属性 = region) %>%
+  select(変数, everything()) ->region_fig
+
+# 性別
+data_atr %>%
+  group_by(gender) %>%
+  tally() %>%
+  mutate( 割合 = n/N) %>% 
+  select(-n) %>%
+  mutate(変数 = c("性別","", "")) %>%
+  rename(属性 = gender) %>%
+  select(変数, everything()) ->gender_fig
+
+```
+
+---
+
+```{r}
+# 実家
+data_atr %>%
+  group_by(familyhouse) %>%
+  tally() %>%
+  mutate( "割合" = n/N) %>% 
+  select(-n) %>%
+  mutate("変数" = c("実家暮らしかどうか","")) %>%
+  rename(属性 = familyhouse) %>%
+  select(変数, everything(),) ->　fam_fig
+
+# 成人
+data_atr %>%
+  group_by(adult) %>%
+  tally() %>%
+  mutate( 割合 = n/N) %>% 
+  select(-n) %>%
+  mutate(変数 = c("成人かどうか","")) %>%
+  rename(属性 = adult) %>%
+  select(変数, everything()) ->adult_fig
+
+```
+
+
+---
+class: smalltable
+
+```{r}
+rbind(gender_fig,adult_fig, fam_fig, region_fig)  %>%
+  knitr::kable( digits = 2) -> tab_atr
+
+tab_atr
+```
+
+---
+## 推定のためのデータセット
+
+```{r}
+
+data_for_estimation %>% 
+  mutate( gender =　case_when(gender == "1 : 男性" ~ "0", 
+                              gender == "2 : 女性" ~ "female",
+                              gender == "3 : 回答したくない" ~ "0"),
+          exp    =  case_when(experience == "1 : 過去半年以内" ~ "halfyear", 
+                              experience == "2 : 過去半年から１年以内" ~ "half_to_1year", 
+                              experience == "3 : １年以上前" ~ "0" ),
+          adult = if_else(age>=20, 1, 0),
+          region =  case_when(region == "1 : 北海道地方" ~ "_Kanto", 
+                              region == "2 : 東北地方" ~ "_Kanto", 
+                              region == "3 : 関東地方" ~ "_Kanto" ,
+                              region == "4 : 中部地方" ~ "_Kanto",
+                              region == "5 : 近畿地方" ~ "Kansai",
+                              region == "6 : 中国地方" ~ "Kansai",
+                              region == "7 : 四国地方" ~ "Kansai",
+                              region == "8 : 九州地方(沖縄含む)" ~ "Kansai",
+                              region == "9 : 海外" ~ "Oversea",
+          )
+  ) -> data_for_estimation
+
+```
+
+---
+```{r}
+datalogit <- dfidx(data = as.data.frame(data_for_estimation),
+                   choice = "choice", 
+                   varying = 9:17, 
+                   sep = "_",
+                   idx = list(c("choiceid", "ID")), 
+                   idnames = c("chid", "alt"),
+                   opposite = c("price"))
+
+```
+
+
+
+---
+## 消費者属性入りの定式化
+
+- 価格の係数及びきのこ・たけのこ係数が、消費者属性 $z_i$ に依存すると考える。
+
+$$
+\begin{aligned}
+U_{i, k, Kinoko} &=\alpha_{Kinoko }(z_i) - \beta_{Kinoko}(z_i) p_{k, Kinoko} +\epsilon_{i, k, Kinoko} \\
+U_{i, k, Takenoko} &=\alpha_{Takenoko }(z_i)- \beta_{Takenoko}(z_i) p_{k, Takenoko}+\epsilon_{i, k,Takenoko} \\
+U_{i, k, outside} &= \epsilon_{i, k, other}
+\end{aligned}
+$$
+- ここで、係数は以下のように与える
+$$
+\begin{aligned}
+\alpha(z_{i})	&=	\alpha_{0}+\sum_{d=1}^{D}\alpha_{d}z_{di} \\
+\beta_{j}(z_{i})	&=	\beta_{0,j}+\sum_{d=1}^{D}\beta_{d,j}z_{di}, j\in \{Kinoko, Takenoko \} 
+\end{aligned}
+$$
+  - $z_{di}$ は消費者 $i$ の属性 $d$ (成人ダミーなど)
+
+---
+## 【R分析】消費者属性入りの多項ロジットモデル推定
+
+```{r}
+with_atr <- formula(choice ~price+Kinoko+Takenoko+
+                      price:gender+Takenoko:gender+Kinoko:gender+ 
+                      price:familyhouse+Takenoko:familyhouse+Kinoko:familyhouse+
+                      price:adult+Takenoko:adult+Kinoko:adult+
+                      price:region+Takenoko:region+Kinoko:region | 0 | 0) # 式が長いので事前に格納
+
+ml_consumer_atr <- mlogit(formula = with_atr, 
+                          data = datalogit,
+                          reflevel = '0')
+```
+
+- `gender`: 女性ダミー、 `familyhouse` : 実家ダミー、`adult`: 成人ダミー、 `region`: 地域（関西、海外）
+
+---
+## 推定結果の出力
+
+```{r, eval=FALSE}
+stargazer::stargazer(multilogit,ml_consumer_atr,
+                     single.row=TRUE,type="text",align = TRUE)
+```
+
+---
+## 推定結果
+
+```{r, eval=TRUE, echo=FALSE}
+stargazer::stargazer(multilogit,ml_consumer_atr,
+                     single.row=TRUE,type="text",align = TRUE)
+```
+
+---
+class: title-slide-section, center, middle
+name: logistics
+# 拡張２：ランダム係数ロジットモデル
+
 ---
 ## 離散選択モデル：ランダム係数ロジットモデル
 
@@ -854,11 +1056,14 @@ $$
 
 - ここで、
   -   $\alpha_{i, j} \sim N\left(\theta_{j}, \sigma_{j}^{2}\right)$ for $j \in\{$ Kinoko, Takenoko $\}$
-  -   $\beta_{i} \sim \log N\left(\theta_{\beta}, \sigma_{\beta}^{2}\right) .$
+  -   $\beta_{i} \sim N\left(\theta_{\beta}, \sigma_{\beta}^{2}\right) .$
 
 
 - これらの分布のパラメタを推定する。
   - 技術的な詳細は補足資料を参照(少し難しめ)
+  
+  
+- 注：消費者属性も加味可能だが講義では省略。(実証ビジエコ第２章を参照)
 
 
 ---
@@ -868,7 +1073,7 @@ $$
 rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0, 
                     data = datalogit, 
                     panel = TRUE, 
-                    rpar = c(price = "ln", Kinoko = "n", Takenoko = "n") , 
+                    rpar = c(price = "n", Kinoko = "n", Takenoko = "n") , 
                     R = 50, 
                     correlation = FALSE)
 ```
@@ -882,6 +1087,22 @@ rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0,
 ```{r, eval = FALSE}
 stargazer::stargazer(multilogit, rcdclogit, type="text")
 ```
+
+
+---
+## 【参考】乱数のドロー数
+
+- 乱数のドロー数を便宜上50としているが、これは少なすぎる。
+
+
+- ドロー数が多いとより正確。ただし、計算時間(推定時間)が長くなる。
+
+
+- 推定結果がドロー数によってあまり変化しなくなるくらい大きい値にするのが重要。
+
+
+- なお、ガウス求積など、正確な値を得つつ、計算負荷を下げる方法もある。(興味ある人は個人的に)
+
 
 
 ---
@@ -951,8 +1172,8 @@ plot(p1)
 
 ```{r}
 p2 <- ggplot(data = data.frame(x = c(0.05, 0.3) ), aes(x)) +
-  stat_function(fun = dlnorm, n = 101, 
-                args = list(mean = dist_price$mean, sd = dist_price$sigma), colour = "red" ) + 
+  stat_function(fun = dnorm, n = 101, 
+                args = list(mean = dist_price$mean, sd = abs(dist_price$sigma)), colour = "red" ) + 
   ylab("") +
   scale_y_continuous(breaks = NULL) + ggtitle("Beta (price coefficient)")
 ```
@@ -967,10 +1188,17 @@ plot(p2)
 plot(p2)
 ```
 
+
+---
+class: title-slide-section, center, middle
+name: logistics
+# 応用例：需要曲線のプロット
+
+
 ---
 ## 需要曲線のプロット
 
-- ランダム係数ロジットモデルの推定結果にもとづいて、需要曲線をプロットする。
+- ランダム係数ロジットモデル(消費者属性なし)の推定結果にもとづいて、需要曲線をプロットする。
 
 
 - 解釈：推定しているものは消費者の選択確率のモデル。しかしながら、選択確率＝市場シェアと解釈可能。
@@ -1003,7 +1231,7 @@ R = 1000
 # 消費者のパラメタを、乱数によって発生させる。
 alpha_Kinoko_vec = rnorm(n = R, mean = dist_Kinoko$mean, sd = abs(dist_Kinoko$sigma) )
 alpha_Takenoko_vec = rnorm(n = R, mean = dist_Takenoko$mean, sd = abs(dist_Takenoko$sigma) )
-beta_vec  = rlnorm(n = R, mean = dist_price$mean, sd = abs(dist_price$sigma) )
+beta_vec  = rnorm(n = R, mean = dist_price$mean, sd = abs(dist_price$sigma) )
 ```
 
 ---
@@ -1136,428 +1364,7 @@ plot(fig_rev)
 ```
 
 
----
-## ひとまずのまとめ１：データの種類と限界点
 
-- 今回用いたサーベイデータを表明選好データ(Stated preference) と呼ぶ。
-  - 仮想のアンケートを用いて、人々の選好に関する情報を収集している。
-  
-  
-- 一方、現実の購買行動データを、顕示選好データ(Revealed preference) と呼ぶ。
-  - POS データ、購買履歴データ、など。
 
 
-- 表明選好データにおいては、常に「その行動が真の行動を反映しているのか？」を考えなければならない。
 
-
-- 同時に、サーベイ一般の問題として、サーベイ対象者が興味ある母集団全体を反映しているのかについても要検討。
-
-
----
-## ひとまずのまとめ２：さらなる分析
-
-- 今回のアンケートでは消費者属性についても質問している。属性によってきのこ・たけのこへの選好が異なるのでは？
-
-
-- 後半の実習パートで見ていこう。
-
-
----
-class: title-slide-section, center, middle
-name: logistics
-# フルスクラッチでモデル推定
-
----
-## フルスクラッチで推定コードをプログラミング
-
-- 自分自身で推定・シミュレーションのコードをプログラミングする状況が多々ある。
-  - むしろパッケージで実行可能な構造推定手法は限定的
-  
-
-- 以下では、多項ロジットモデルの推定のコードについて、ゼロから書いていこう。
-
-
-- 手順：
-  - Step 1: 多項ロジットモデルの尤度関数を定義する。
-  - Step 2: 最尤法による推定：定義した尤度関数について数値最適化を行う。-> 点推定値
-  - Step 3: 標準誤差の計算
-
-
----
-## 多項ロジットモデルの尤度関数(再掲)
-
-- 尤度関数は
-$$L(\theta)= \prod_{i=1}^{N} \prod_{k=1}^{5}P_{k}\left(j=y_{i,k}|\theta\right)$$ 
-  - ここで
-$$P_k(j|\theta ) = \frac{\exp(\alpha_{j} - \beta \cdot p_{j, k})}{1 + \exp(\alpha_{Kinoko} - \beta \cdot p_{Kinoko, k}) + \exp(\alpha_{Takenoko} - \beta \cdot p_{Takenoko, k})}$$
-
-- パラメタは $\theta = (\beta, \alpha_{Kinoko}, \alpha_{Takenoko})$
-
-
----
-## 対数尤度(再掲)
-
-- 対数尤度関数を用いる
-$$\log L(\theta)= \sum_{i=1}^{N} \sum_{k=1}^{5} \log P_{k}\left(j=y_{i,k}|\theta\right)$$ 
-
-- ポイント：この対数尤度を最大化するような値は解析的には得られない。数値計算の出番！！
-
-
-
----
-## 【R分析】Step 1: 対数尤度関数の定義
-
-- 関数`f_logit_prob`は上で定義済み。
-
-```{r, eval=FALSE}
-f_likelihood_logit <- function(param, data){
-
-  alpha_Kinoko <- param[1]
-  alpha_Takenoko <- param[2]
-  beta   <- param[3]
-
-  P1 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 200, 200)
-  P2 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 180, 200)
-  P3 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 200, 170)
-  P4 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 220, 200)
-  P5 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 190, 210)
-
-```
-
----
-## 【R分析】続き
-
-```{r, eval= FALSE}
-
-  pred <- rbind(P1, P2, P3, P4, P5)
-  pred <- as_tibble(pred)
-  pred$occasion <- c("Q1", "Q2", "Q3", "Q4", "Q5")
-  
-  data %>%
-    left_join(pred, by = "occasion") %>%
-    mutate( choice_prob = case_when( choice == 0 ~ prob_Other,
-                                     choice == 1 ~ prob_Kinoko,
-                                     choice == 2 ~ prob_Takenoko) ) %>%
-    mutate(log_choice_prob = log(choice_prob)) %>%
-    select(log_choice_prob) -> result
-
-  likelihood <- sum(result)
-
-  return(likelihood)
-
-}
-
-```
-
-```{r, eval = TRUE, echo = FALSE}
-f_likelihood_logit <- function(param, data){
-
-  alpha_Kinoko <- param[1]
-  alpha_Takenoko <- param[2]
-  beta   <- param[3]
-
-  P1 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 200, 200)
-  P2 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 180, 200)
-  P3 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 200, 170)
-  P4 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 220, 200)
-  P5 <- f_logit_prob(alpha_Kinoko, alpha_Takenoko, beta, 190, 210)
-
-  pred <- rbind(P1, P2, P3, P4, P5)
-  pred <- as_tibble(pred)
-  pred$occasion <- c("Q1", "Q2", "Q3", "Q4", "Q5")
-  
-  data %>%
-    left_join(pred, by = "occasion") %>%
-    mutate( choice_prob = case_when( choice == 0 ~ prob_Other,
-                                     choice == 1 ~ prob_Kinoko,
-                                     choice == 2 ~ prob_Takenoko) ) %>%
-    mutate(log_choice_prob = log(choice_prob)) %>%
-    select(log_choice_prob) -> result
-
-  likelihood <- sum(result)
-
-  return(likelihood)
-
-}
-```
-
-
----
-## 【R分析】Step 2: 対数尤度関数の最大化
-
-- 定義した対数尤度関数を最大化するようなパラメタを求めたい。
-
-- どうやるか？ -> 数値最適化
-
-- まずは数値最適化について簡単に説明する。
-
----
-## 数値最適化
-
-- 定義した関数について、その関数を最大にするような変数を求める作業。
-
-- 簡単な例： $f(x,a) = (x - a)^2$. $a$ はパラメタ。
-
-```{r}
-# 関数の定義
-fx <- function(x,a){ (x-a)^2 }
-```
-
-- 当然ながら、 $x=a$ で最小化される。
-
-- 数値最適化を行って確かめてみよう。
-
----
-## `optimize`関数による数値最適化
-
-```{r}
-# 関数を最小化する。
-xmin <- optimize( f = fx, 
-                  interval = c(-10,10), 
-                  a = 2.4)
-print(xmin)
-```
-
-- `f`: 最小化したい、自分で定義した関数。なお、`optimize`は1変数のみ。(多変数は後述)
-- `interval`: 変数を探索する範囲。
-- `a`: 自分で定義した関数に追加の引数が必要な場合は指定する。
-
-
----
-## 数値最適化の一般論
-
-- Rのデフォルトは`optimize`と`optim`
-  - `optimize`は一変数の最適化
-  - `optim`は多変数の最適化
-  
-  
-- その他にも様々なパッケージ：`optimx`
-
-
-- 数値最適化のややこしい点：様々なオプションを設定しなければならない。
-  - 最適化の方法：微分を使うか否か
-  - 初期値の選び方
-  - 最適化停止の基準(tolerance): 目的関数や微分の値がどの程度動かなくなったら停止するか？
-  
-  
----
-## 最適化の方法
-
-  
-- 微分を使わない方法：Nelder-Mead、シンプレックス法
-
-
-- 微分を使う方法：BFGS (quasi-Newton法)
-  
-  
-- また、微分を使う方法の場合も、いくつかのVariation
-  - 自分で微分を計算して関数として与える
-  - 数値微分を内部で計算してもらう。
-  
-  
-- 関数が滑らか（微分可能）で、微分計算ができるならば、微分を使う方法の方が早い。
-
-
-- 関数が滑らかかわからない場合は、微分を使わない方法を使う。ただし、計算時間がかかる。
-
----
-## 初期値の選び方
-
-- 初期値：どの値から関数の評価を始めるか。
-
-
-- 非常に重要。
-  - 極端な値を選ぶと、関数の内部で変なことが発生し、最適化が進まない。(例：exp関数)
-  - 初期値によっては、**大域的最適点**ではなく、**局所最適点**に止まるかも。
-  
-  
-- 実践においては
-  - 初期値をうまく選ぶ(後述)
-  - いろいろな初期値を試して、結果が大きく変わらないことを確かめる&目的関数が小さくなる値を選ぶ。
-  
----
-## 最適化停止の基準(tolerance)
-
-- 目的関数や微分の値がどの程度動かなくなったら停止するか？
-
-- 基準をゆるくすると、計算時間は早いが、得られる値は不正確かもしれない。
-
-- 関数における引数やアウトプットのスケールとも関連する。
-
-
----
-## 数値最適化の参考資料
-
-- 数値最適化は非常に広い
-  - 今回扱っているのは、制約なしの非線形最適化
-  - その他：線形計画、制約つき最適化、非線形方程式、などなど
-
-
-- 離散選択モデルにおける最適化については、[TrainのChapter 8](https://eml.berkeley.edu/books/choice2nd/Ch08_p183-204.pdf)がよくまとまっている。
-
-
-- 経済学一般におけるガイドとしては、[Miranda and Fackler "Applied Computational Economics and Finance"](https://www.amazon.co.jp/Applied-Computational-Economics-Finance-Fackler/dp/8120339347) ただしMatlabベース。
-
-
-- Rにおける数値最適化のガイドとして [Optimization with R –Tips and Tricks](https://hwborchers.lima-city.de/Presents/ROptimSlides4.pdf)
-
----
-## 【R分析】Step 2: 対数尤度関数の最大化
-
-- `optimx`パッケージを用いて、対数尤度関数の最大化を行う。
-  - 後ほど標準誤差計算に必要なヘシアンの計算のため。
-
-```{r, cache = FALSE}
-# 初期パラメタ
-ini <- c(5,5, -0.01)
-
-# 最適化
-result <- optimx( par = ini, 
-                  fn = f_likelihood_logit, 
-                  method="Nelder-Mead", 
-                  data = data_for_estimation, 
-                  control = list(fnscale=-1), 
-                  hessian = TRUE  )
-
-# 推定値の取得
-est_vec <- as.numeric(result[1,1:3])
-```
-
----
-## 【R分析】`optimx`の引数
-
-- `par`: 初期値
-- `fn`: 最適化したい関数
-- `method`: 方法。ここではNelder－Mead （シンプレックス法）
-- `data`: 定義した`f_likelihood_logit`で必要な引数
-- `control`: 最大化なので、`fnscale = -1`としている。
-- `hessian`: 数値計算で得られるヘシアン。後ほど。
-
----
-## どうやって初期値を選んだのか？
-
-- 身も蓋もない説明としては：
-  - `mlogit`ですでに推定値がわかっている -> パラメタのスケールの当たりがついている。
-  - 多項ロジットモデルの対数尤度関数は、**大域的に凹関数** -> 初期値はそこまで重要でない。
-
-
-- 初期値の選び方に関する実践(個人的経験に基づく)
-  - パラメタを適当にいれて、対数尤度関数を計算し、変な値にならないことを確認する。
-  - グリッドサーチをする。
-  - 多次元関数における一部変数を固定して、一次元でプロットしてみる。
-  
-  
----
-## 実践１：極端な値を入れない。
-
-- 関数の中に`exp`が入っているときや、分母に変数が入る場合は気をつける。`Inf`が生じて、内部の計算がおかしくなる。
-
-```{r}
-exp(2000)
-1/0
-```
-  
----
-
-- ロジットモデルにおいて初期値のパラメタを極端にすると、尤度が計算できない。
-  - 例えば、$\beta_{Kinoko} = 10000$ を初期値にしたとき、exp()関数は発散し、確率は０／１に張り付く。
-  - 尤度関数の中に $\log (P)$があるため、尤度が $-\infty$ になる。
-  
-  
-- 選んだ初期値において、最適化したい関数の中身がちゃんと計算されているか（例：確率、尤度）を確認する！！
-  
-  
----
-## 実践２：グリッドサーチ
-
-- 最適化の変数が３つであれば、それぞれ１０通りの取りうる値を選び、合計１０００通りの組み合わせについて、目的関数を評価する。
-
-
-- その結果、最も目的関数が大きく（小さく）なる値を初期値として選んで、数値最適化する。
-
-
-- 注意点：変数が多くなると大変。いわゆる**次元の呪い**
-
-
----
-## 実践３：一次元（二次元）プロット
-
-- 一次元・二次元ならば、図としてプロット可能。
-
-
-- 一部のパラメタを（適切に）止めた上で、他のパラメタについて動かしてみる。
-
-
-- ある程度の当たりをつけた上で、数値最適化する。
-
-
----
-## 【参考】数値最適化・シミュレーションの個人的コツ
-
--	目的関数の評価時間についてプロファイラーで計算する。
--	モンテカルロ実験
-  - 真のパラメタを知っている元でデータを生成。
-  - そのデータを使って推定を行い、元のパラメタを復元できるか？
-  - デバッグの手段としても有効。
-- 並列計算の活用
-  - いろいろな初期値をたくさん試す場合に有効
-  
----
-## 【参考】個人的コツ続き
-
-- モデルの挙動を把握する(比較静学)
-  - 経済学的思考をバグ取りに活用する。数値計算の結果が経済的な直感と合うのか？？
-- パラメタの識別を考える。
-- パラメタにReasonableな制約を入れる。
-  - パラメタが変な値をとったときに、モデルの挙動がおかしくなるのを防ぐ。
-- 最適化する変数のスケールをなるべく合わせる。
-  - 最適化のToleranceとも関係。
-
-
----
-## 【参考】標準誤差の計算
-
-- 最尤推定量の標準誤差の計算。
-
-- 漸近正規性
-$$\sqrt{n}\left(\hat{\theta}-\theta_{0}\right)	\stackrel{d}{\longrightarrow}N(0,V)$$
-
-- ここで、
-$$A	=-E\left[\left.\frac{\partial^{2}\log f(y_{i};\theta)}{\partial\theta\partial\theta'}\right|_{\theta=\theta_{0}}\right]$$
-
-$$V	=A^{-1}$$
-
----
-
-- この結果にもとづいて、漸近分散の計算を以下のように行うことができる。
-
-- まず、漸近分散の推定として、
-$$\hat{A}	=-\frac{1}{n}\sum_{i=1}^{N}\frac{\partial^{2}}{\partial\theta\partial\theta}\log f(y_{i},\theta)
-	=-\frac{\partial^{2}}{\partial\theta\partial\theta}\frac{1}{N}l(\theta)$$
-	
-- これは目的関数(をサンプルサイズで割った値)のヘシアンに相当する。なお、目的関数（対数尤度）のヘシアンは、数値計算などにおいて付随的に計算されることが多い。
-
-- よって漸近分散の推定値 $ase(\hat{\theta})$ は、
-$$ase(\hat{\theta})=\sqrt{diag(\frac{1}{n}\hat{A}^{-1})}$$
-として与えられる。ここで、diag(X)は行列Xの対角要素のみを抜き出したベクトルである。
-
----
-## 【R分析】Step 3: 標準誤差の計算
-
-- 以上を踏まえて、目的関数のヘシアンを数値的に計算すれば良い。
-
-- `optimx`には、`gHgen`というヘシアンを数値計算する関数が存在する。
-
-```{r, cache = FALSE}
-Hessian <- gHgen(par = as.numeric(result[2,1:3]), 
-                 fn = f_likelihood_logit, 
-                 data = data_for_estimation)
-se_vec <- round(sqrt(diag(solve(-Hessian$Hn))), 3)
-```
-
----
-## 推定結果のまとめ
-
-```{r}
-print( rbind(est_vec, se_vec) )
-```

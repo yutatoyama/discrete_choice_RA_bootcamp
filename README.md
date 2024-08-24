@@ -1,6 +1,8 @@
-# トピックレクチャー：構造推定入門（離散選択モデル）
+# トピックレクチャー：離散選択モデル
 
 担当：遠山祐太
+
+最終更新：2024年8月24日
 
 ## ファイルの説明
 
@@ -8,7 +10,10 @@
 
 - `slide_1_lecture.XXX`: 講義スライド
 - `slide_2_practice.XXX`: 演習問題
-- `slide_3_appendix.XXX`: 補足資料
+- `slide_3_appendix.XXX`: 補足資料１：理論編
+- `slide_4_code_scratch.XXX`: 補足資料２：パッケージを利用しない多項ロジットモデルの推定
+
+講義においては、slide_1_lecture と slide_2_practice を中心にカバーします。
 
 ## 必要なパッケージ
 
