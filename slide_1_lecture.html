@@ -21,7 +21,7 @@ class: center, middle, inverse, title-slide
 ### 講師: 遠山祐太 (早稲田大学)
 ]
 .date[
-### 最終更新: 2024-08-24 23:27:15
+### 最終更新: 2024-08-27 23:16:12
 ]
 
 ---
@@ -76,7 +76,7 @@ name: logistics
 - 目標１：離散選択モデルによって、どのような分析ができるかを学ぶ。
 
 
-- 目標２：パッケージを利用した離散選択モデルの推定の基礎を学ぶ。
+- 目標２：パッケージを利用した離散選択モデルの推定に親しむ。
 
 
 ---
@@ -111,7 +111,7 @@ name: logistics
 ---
 ## 参考文献
     
-- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第二章
+- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第２章
   - 経済セミナー連載記事に基づき、現在書籍化進行中！
   
   
@@ -245,7 +245,7 @@ name: logistics
   - 解釈：選択肢 `\(j\)` から得られる効用が最も大きくなる確率
 
 
--   この選択確率は `\(\{\epsilon_{ij}\}_{j=1}^{J}\)` に関する分布の仮定による。
+-   この選択確率の形は `\(\{\epsilon_{ij}\}_{j=1}^{J}\)` に関する分布の仮定による。
   - 例：ロジットモデル、プロビットモデル
 
 
@@ -258,7 +258,7 @@ name: logistics
 - 多項ロジットモデル： 選択肢の個数が２以上の場合
 
 
-- ランダム係数ロジットモデル：効用パラメタの係数が何ら頭の分布に従う場合
+- ランダム係数ロジットモデル：効用パラメタの係数が人によってランダムな場合
 
 
 - その他(本日は割愛)：
@@ -295,13 +295,14 @@ name: logistics
 - 二項プロビットモデル： `\(\epsilon_{i,j}\)` が i.i.d. の標準正規分布に従うと考える。
 
 
-- 二項ロジット・プロビット(と最尤法)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
+- 二項ロジット・プロビット(と最尤法の理論)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
 
 ---
 ## 離散選択モデルの応用
 
 - 以下のモデルを考えよう。
     `$$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$`
+
 
 - モデルの使い方
   - 限界効果
@@ -331,7 +332,7 @@ $$
 - 効用の中に価格が入っている場合、製品属性への支払い意思額を計算することが可能。
 
 
-- 例： `\(V_j = \alpha p_j + \beta size_j\)` とする。$p_j$ は価格、 `\(size_j\)` はモニターサイズ(単位：インチ)。
+- 例： `\(V_j = \alpha p_j + \beta size_j\)` とする。 `\(p_j\)` は価格、 `\(size_j\)` はモニターサイズ(単位：インチ)。
 
 
 - モニターサイズ 1インチへの支払い意思額は 
@@ -454,7 +455,7 @@ name: logistics
 - アンケートでは上述の選択肢問題に加えて、消費者属性についての設問も。
 
 
-- 演習において、RAブートキャンプ参加者に回答してもらったアンケートデータを用いた分析を行う。
+- 演習においてRAブートキャンプ参加者に行ったアンケートデータを用いた分析を行う。
 
 ---
 ## 結果を見る前に：選択型コンジョイント分析
@@ -928,23 +929,31 @@ name: logistics
 # 回答者の属性の比率を表にするためのデータ整形
 data %&gt;%
   mutate(gender =　case_when(gender == "1 : 男性" ~ "男性", 
-                             gender == "2 : 女性" ~ "女性",
+                            gender == "2 : 女性" ~ "女性",
                             gender == "3 : 回答したくない" ~ "未回答"),
-          exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
-                              experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
-                              experience == "3 : １年以上前" ~ "１年以上前",
-                              experience == "4 : 食べたことがない" ~ "食べたことがない"),
-          adult = if_else(age&gt;=20, "成人", "未成年"),
-    region =  case_when(region == "1 : 北海道地方" ~ "関東", 
-                              region == "2 : 東北地方" ~ "関東", 
-                              region == "3 : 関東地方" ~ "関東" ,
-                              region == "4 : 中部地方" ~ "関東",
-                              region == "5 : 近畿地方" ~ "関西",
-                              region == "6 : 中国地方" ~ "関西",
-                              region == "7 : 四国地方" ~ "関西",
-                              region == "8 : 九州地方(沖縄含む)" ~ "関西",
-                              region == "9 : 海外" ~ "海外"),
-    familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない")) -&gt; data_atr
+         exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
+                             experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
+                             experience == "3 : １年以上前" ~ "１年以上前",
+                             experience == "4 : 食べたことがない" ~ "食べたことがない"),
+         adult = if_else(age&gt;=20, "成人", "未成年") ) -&gt; temp
+```
+
+
+---
+
+
+```r
+temp %&gt;% 
+  mutate(region =  case_when(region == "1 : 北海道地方" ~ "関東", 
+                             region == "2 : 東北地方" ~ "関東", 
+                             region == "3 : 関東地方" ~ "関東" ,
+                             region == "4 : 中部地方" ~ "関東",
+                             region == "5 : 近畿地方" ~ "関西",
+                             region == "6 : 中国地方" ~ "関西",
+                             region == "7 : 四国地方" ~ "関西",
+                             region == "8 : 九州地方(沖縄含む)" ~ "関西",
+                             region == "9 : 海外" ~ "海外"),
+         familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない") )  -&gt; data_atr
 ```
 
 
@@ -1032,8 +1041,8 @@ tab_atr
 ```r
 data_for_estimation %&gt;% 
   mutate( gender =　case_when(gender == "1 : 男性" ~ "0", 
-                              gender == "2 : 女性" ~ "female",
-                              gender == "3 : 回答したくない" ~ "0"),
+                             gender == "2 : 女性" ~ "female",
+                             gender == "3 : 回答したくない" ~ "0"),
           exp    =  case_when(experience == "1 : 過去半年以内" ~ "halfyear", 
                               experience == "2 : 過去半年から１年以内" ~ "half_to_1year", 
                               experience == "3 : １年以上前" ~ "0" ),
@@ -1114,7 +1123,6 @@ stargazer::stargazer(multilogit,ml_consumer_atr,
 ```
 
 ---
-## 推定結果
 
 
 ```
@@ -1222,7 +1230,6 @@ stargazer::stargazer(multilogit, rcdclogit, type="text")
 
 
 ---
-## 推定結果(ロジットとランダム係数ロジット)
 
 
 ```
@@ -1295,7 +1302,7 @@ p1 &lt;- ggplot(data = data.frame(x = c(-25, 25)), aes(x)) +
   stat_function(fun = dnorm, n = 101, 
                 args = list(mean = dist_Kinoko$mean -dist_Takenoko$mean , 
                             sd = sqrt(dist_Kinoko$sigma^2 + dist_Takenoko$sigma^2) ) ) +
-  ylab("") +
+  ylab("") + theme_bw() + 
   ggtitle("Preference Kinoko over Takenoko")
 ```
 
@@ -1308,7 +1315,7 @@ plot(p1)
 ---
 ## ランダム係数の分布： `\(\beta_{i,Kinoko} - \beta_{i, Takenoko}\)`
 
-&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-37-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-38-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 ## 【R分析】価格係数の分布
@@ -1320,7 +1327,7 @@ plot(p1)
 p2 &lt;- ggplot(data = data.frame(x = c(0.05, 0.3) ), aes(x)) +
   stat_function(fun = dnorm, n = 101, 
                 args = list(mean = dist_price$mean, sd = abs(dist_price$sigma)), colour = "red" ) + 
-  ylab("") +
+  ylab("") + theme_bw() + 
   scale_y_continuous(breaks = NULL) + ggtitle("Beta (price coefficient)")
 ```
 
@@ -1331,7 +1338,7 @@ plot(p2)
 
 ---
 ## 価格係数の分布
-&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-40-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-41-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -1476,7 +1483,7 @@ data_demand_kinoko = tibble( price = price_vec,
 fig_demand &lt;- ggplot(data = data_demand_kinoko, aes(x = demand, y = price) ) +
   geom_line() + 
   xlab("Demand (Share of Kinoko)") + 
-  ylab("Price of Kinoko in JPY") + 
+  ylab("Price of Kinoko in JPY") + theme_bw() + 
   ggtitle("Demand Curve of Kinoko when Takenoko's price = JPY 200")
 ```
 
@@ -1488,7 +1495,7 @@ plot(fig_demand)
 ---
 ## 推定された需要関数
 
-&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-47-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-48-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 ## 【R分析】収入関数のプロット
@@ -1498,7 +1505,7 @@ plot(fig_demand)
 fig_rev &lt;- ggplot(data = data_demand_kinoko, aes(x = price, y = revenue) ) +
   geom_line() + 
   xlab("Price of Kinoko in JPY") + 
-  ylab("Revenue of Kinoko in JPY") + 
+  ylab("Revenue of Kinoko in JPY") + theme_bw() + 
   ggtitle("Revenue Curve of Kinoko when Takenoko's price = JPY 200")
 ```
 
@@ -1510,7 +1517,7 @@ plot(fig_rev)
 ---
 ## 推定された収入関数
 
-&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-50-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="slide_1_lecture_files/figure-html/unnamed-chunk-51-1.png" style="display: block; margin: auto;" /&gt;
 
 
 

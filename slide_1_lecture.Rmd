@@ -66,7 +66,7 @@ name: logistics
 - 目標１：離散選択モデルによって、どのような分析ができるかを学ぶ。
 
 
-- 目標２：パッケージを利用した離散選択モデルの推定の基礎を学ぶ。
+- 目標２：パッケージを利用した離散選択モデルの推定に親しむ。
 
 
 ---
@@ -101,7 +101,7 @@ name: logistics
 ---
 ## 参考文献
     
-- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第二章
+- 上武・遠山・若森・渡辺 [「実証ビジネスエコノミクス」](https://www.nippyo.co.jp/blogkeisemi/available_support_guide/e-biz-econ/)  の第２章
   - 経済セミナー連載記事に基づき、現在書籍化進行中！
   
   
@@ -235,7 +235,7 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
   - 解釈：選択肢 $j$ から得られる効用が最も大きくなる確率
 
 
--   この選択確率は $\{\epsilon_{ij}\}_{j=1}^{J}$ に関する分布の仮定による。
+-   この選択確率の形は $\{\epsilon_{ij}\}_{j=1}^{J}$ に関する分布の仮定による。
   - 例：ロジットモデル、プロビットモデル
 
 
@@ -248,7 +248,7 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 - 多項ロジットモデル： 選択肢の個数が２以上の場合
 
 
-- ランダム係数ロジットモデル：効用パラメタの係数が何ら頭の分布に従う場合
+- ランダム係数ロジットモデル：効用パラメタの係数が人によってランダムな場合
 
 
 - その他(本日は割愛)：
@@ -285,13 +285,14 @@ $$u_{ij} = -1 p_{jt} + 3 \times (画面サイズ) + 0.5\times(バッテリー時
 - 二項プロビットモデル： $\epsilon_{i,j}$ が i.i.d. の標準正規分布に従うと考える。
 
 
-- 二項ロジット・プロビット(と最尤法)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
+- 二項ロジット・プロビット(と最尤法の理論)については、`Lecture_9_MLE_binary_choice.pdf` を参照。
 
 ---
 ## 離散選択モデルの応用
 
 - 以下のモデルを考えよう。
     $$\mathrm{Pr}\left(d_{i}=j|\{p_{j},X_{j}\}_{j=1}^J \right)=\frac{\exp(\alpha p_{j}+\beta X_{j})}{\sum_{k=1}^{J} \exp(\alpha p_{k}+\beta X_{k})}$$
+
 
 - モデルの使い方
   - 限界効果
@@ -321,7 +322,7 @@ $$
 - 効用の中に価格が入っている場合、製品属性への支払い意思額を計算することが可能。
 
 
-- 例： $V_j = \alpha p_j + \beta size_j$ とする。$p_j$ は価格、 $size_j$ はモニターサイズ(単位：インチ)。
+- 例： $V_j = \alpha p_j + \beta size_j$ とする。 $p_j$ は価格、 $size_j$ はモニターサイズ(単位：インチ)。
 
 
 - モニターサイズ 1インチへの支払い意思額は 
@@ -444,7 +445,7 @@ name: logistics
 - アンケートでは上述の選択肢問題に加えて、消費者属性についての設問も。
 
 
-- 演習において、RAブートキャンプ参加者に回答してもらったアンケートデータを用いた分析を行う。
+- 演習においてRAブートキャンプ参加者に行ったアンケートデータを用いた分析を行う。
 
 ---
 ## 結果を見る前に：選択型コンジョイント分析
@@ -857,32 +858,36 @@ name: logistics
 # 回答者の属性の比率を表にするためのデータ整形
 data %>%
   mutate(gender =　case_when(gender == "1 : 男性" ~ "男性", 
-                             gender == "2 : 女性" ~ "女性",
+                            gender == "2 : 女性" ~ "女性",
                             gender == "3 : 回答したくない" ~ "未回答"),
-          exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
-                              experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
-                              experience == "3 : １年以上前" ~ "１年以上前",
-                              experience == "4 : 食べたことがない" ~ "食べたことがない"),
-          adult = if_else(age>=20, "成人", "未成年"),
-    region =  case_when(region == "1 : 北海道地方" ~ "関東", 
-                              region == "2 : 東北地方" ~ "関東", 
-                              region == "3 : 関東地方" ~ "関東" ,
-                              region == "4 : 中部地方" ~ "関東",
-                              region == "5 : 近畿地方" ~ "関西",
-                              region == "6 : 中国地方" ~ "関西",
-                              region == "7 : 四国地方" ~ "関西",
-                              region == "8 : 九州地方(沖縄含む)" ~ "関西",
-                              region == "9 : 海外" ~ "海外"),
-    familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない")) -> data_atr
-
-
+         exp    =  case_when(experience == "1 : 過去半年以内" ~ "過去半年以内", 
+                             experience == "2 : 過去半年から１年以内" ~ "過去半年から１年以内", 
+                             experience == "3 : １年以上前" ~ "１年以上前",
+                             experience == "4 : 食べたことがない" ~ "食べたことがない"),
+         adult = if_else(age>=20, "成人", "未成年") ) -> temp
 ```
 
 
 ---
 
 ```{r}
+temp %>% 
+  mutate(region =  case_when(region == "1 : 北海道地方" ~ "関東", 
+                             region == "2 : 東北地方" ~ "関東", 
+                             region == "3 : 関東地方" ~ "関東" ,
+                             region == "4 : 中部地方" ~ "関東",
+                             region == "5 : 近畿地方" ~ "関西",
+                             region == "6 : 中国地方" ~ "関西",
+                             region == "7 : 四国地方" ~ "関西",
+                             region == "8 : 九州地方(沖縄含む)" ~ "関西",
+                             region == "9 : 海外" ~ "海外"),
+         familyhouse = if_else(familyhouse==1,"実家暮らし","実家暮らしでない") )  -> data_atr
+```
 
+
+---
+
+```{r}
 # 地域
 data_atr %>%
   group_by(region) %>%
@@ -945,11 +950,10 @@ tab_atr
 ## 推定のためのデータセット
 
 ```{r}
-
 data_for_estimation %>% 
   mutate( gender =　case_when(gender == "1 : 男性" ~ "0", 
-                              gender == "2 : 女性" ~ "female",
-                              gender == "3 : 回答したくない" ~ "0"),
+                             gender == "2 : 女性" ~ "female",
+                             gender == "3 : 回答したくない" ~ "0"),
           exp    =  case_when(experience == "1 : 過去半年以内" ~ "halfyear", 
                               experience == "2 : 過去半年から１年以内" ~ "half_to_1year", 
                               experience == "3 : １年以上前" ~ "0" ),
@@ -965,7 +969,6 @@ data_for_estimation %>%
                               region == "9 : 海外" ~ "Oversea",
           )
   ) -> data_for_estimation
-
 ```
 
 ---
@@ -977,7 +980,6 @@ datalogit <- dfidx(data = as.data.frame(data_for_estimation),
                    idx = list(c("choiceid", "ID")), 
                    idnames = c("chid", "alt"),
                    opposite = c("price"))
-
 ```
 
 
@@ -1029,11 +1031,10 @@ stargazer::stargazer(multilogit,ml_consumer_atr,
 ```
 
 ---
-## 推定結果
 
 ```{r, eval=TRUE, echo=FALSE}
 stargazer::stargazer(multilogit,ml_consumer_atr,
-                     single.row=TRUE,type="text",align = TRUE)
+                     single.row=TRUE,type="text",align = TRUE) 
 ```
 
 ---
@@ -1069,7 +1070,7 @@ $$
 ---
 ## 【R分析】ランダム係数ロジットモデルの推定
 
-```{r, cache = FALSE}
+```{r, cache = TRUE}
 rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0, 
                     data = datalogit, 
                     panel = TRUE, 
@@ -1106,7 +1107,6 @@ stargazer::stargazer(multilogit, rcdclogit, type="text")
 
 
 ---
-## 推定結果(ロジットとランダム係数ロジット)
 
 ```{r, echo = FALSE}
 stargazer::stargazer(multilogit, rcdclogit, type="text", dep.var.caption = "")
@@ -1149,7 +1149,7 @@ p1 <- ggplot(data = data.frame(x = c(-25, 25)), aes(x)) +
   stat_function(fun = dnorm, n = 101, 
                 args = list(mean = dist_Kinoko$mean -dist_Takenoko$mean , 
                             sd = sqrt(dist_Kinoko$sigma^2 + dist_Takenoko$sigma^2) ) ) +
-  ylab("") +
+  ylab("") + theme_bw() + 
   ggtitle("Preference Kinoko over Takenoko")
 ```
 
@@ -1174,7 +1174,7 @@ plot(p1)
 p2 <- ggplot(data = data.frame(x = c(0.05, 0.3) ), aes(x)) +
   stat_function(fun = dnorm, n = 101, 
                 args = list(mean = dist_price$mean, sd = abs(dist_price$sigma)), colour = "red" ) + 
-  ylab("") +
+  ylab("") + theme_bw() + 
   scale_y_continuous(breaks = NULL) + ggtitle("Beta (price coefficient)")
 ```
 
@@ -1326,7 +1326,7 @@ data_demand_kinoko = tibble( price = price_vec,
 fig_demand <- ggplot(data = data_demand_kinoko, aes(x = demand, y = price) ) +
   geom_line() + 
   xlab("Demand (Share of Kinoko)") + 
-  ylab("Price of Kinoko in JPY") + 
+  ylab("Price of Kinoko in JPY") + theme_bw() + 
   ggtitle("Demand Curve of Kinoko when Takenoko's price = JPY 200")
 ```
 
@@ -1348,7 +1348,7 @@ plot(fig_demand)
 fig_rev <- ggplot(data = data_demand_kinoko, aes(x = price, y = revenue) ) +
   geom_line() + 
   xlab("Price of Kinoko in JPY") + 
-  ylab("Revenue of Kinoko in JPY") + 
+  ylab("Revenue of Kinoko in JPY") + theme_bw() + 
   ggtitle("Revenue Curve of Kinoko when Takenoko's price = JPY 200")
 ```
 
