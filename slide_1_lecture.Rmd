@@ -1070,7 +1070,7 @@ $$
 ---
 ## 【R分析】ランダム係数ロジットモデルの推定
 
-```{r, cache = TRUE}
+```{r, cache = FALSE}
 rcdclogit <- mlogit(choice ~ price + Kinoko + Takenoko | 0, 
                     data = datalogit, 
                     panel = TRUE, 
